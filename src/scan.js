@@ -118,7 +118,7 @@ function makeFinding(rule, file, line, extra = {}) {
 
 // ---------- Проверки отдельных файлов ----------
 
-function scanSecrets(rel, content, findings) {
+export function scanSecrets(rel, content, findings = []) {
   const client = isClientFile(rel, content);
   const reported = new Set(); // чтобы не дублировать одно и то же место
 
@@ -162,13 +162,14 @@ function scanSecrets(rel, content, findings) {
       snippet: snippet(content, m.index, value),
     }));
   }
+  return findings;
 }
 
 // SQL-проверки собираем по всем файлам сразу: таблица может быть создана
 // в одной миграции, а RLS включён в другой.
 const normTable = (name) => name.replace(/"/g, '').toLowerCase().replace(/^public\./, '');
 
-function scanSqlFiles(sqlFiles, findings) {
+export function scanSqlFiles(sqlFiles, findings = []) {
   const created = []; // { table, file, line }
   const rlsEnabled = new Set();
 
@@ -204,6 +205,7 @@ function scanSqlFiles(sqlFiles, findings) {
       }));
     }
   }
+  return findings;
 }
 
 // ---------- Главная функция ----------

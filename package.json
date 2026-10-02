@@ -6,7 +6,9 @@
   "bin": { "vibe-scanner": "./src/index.js" },
   "scripts": {
     "scan": "node src/index.js",
-    "test": "node src/index.js test-project"
+    "test": "node --test",
+    "scan:fixture": "node src/index.js test-project",
+    "scan:self": "node src/index.js ."
   },
   "license": "MIT"
 }
