@@ -1,0 +1,12 @@
+{
+  "name": "vibe-scanner",
+  "version": "0.1.0",
+  "description": "Сканер безопасности для вайбкод-проектов",
+  "type": "module",
+  "bin": { "vibe-scanner": "./src/index.js" },
+  "scripts": {
+    "scan": "node src/index.js",
+    "test": "node src/index.js test-project"
+  },
+  "license": "MIT"
+}

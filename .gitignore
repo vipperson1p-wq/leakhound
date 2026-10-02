@@ -1,0 +1,6 @@
+node_modules/
+.env
+.env.*
+!.env.example
+# Фикстура с фейковыми ключами для тестов
+!test-project/.env.local
