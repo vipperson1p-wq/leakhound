@@ -1,4 +1,4 @@
-import { execSync } from 'node:child_process';
+import { execSync, execFileSync } from 'node:child_process';
 import fs from 'node:fs';
 import path from 'node:path';
 import {
@@ -240,10 +240,37 @@ export function scanSqlFiles(sqlFiles, findings = []) {
 
 // ---------- Главная функция ----------
 
+// Файлы, добавленные в индекс (git add), пути относительно root
+function listStagedFiles(root) {
+  const out = execFileSync('git', ['diff', '--cached', '--name-only', '--relative', '-z', '--diff-filter=ACMR'], {
+    cwd: root, stdio: ['ignore', 'pipe', 'ignore'], maxBuffer: 64 * 1024 * 1024,
+  }).toString();
+  return out.split('\0').filter(Boolean);
+}
+
+// Содержимое файла в индексе — именно то, что попадёт в коммит
+function readStaged(root, rel) {
+  try {
+    const buf = execFileSync('git', ['show', `:./${rel.replace(/\\/g, '/')}`], {
+      cwd: root, stdio: ['ignore', 'pipe', 'ignore'], maxBuffer: 2 * MAX_FILE_SIZE,
+    });
+    if (buf.length > MAX_FILE_SIZE || buf.includes(0)) return null;
+    return buf.toString('utf8');
+  } catch {
+    return null;
+  }
+}
+
 // options.exclude — шаблоны из --exclude, дополняют .vibescanignore
-export function scanProject(root, { exclude = [] } = {}) {
+// options.staged  — проверять только файлы из индекса (для pre-commit хука)
+export function scanProject(root, { exclude = [], staged = false } = {}) {
   root = path.resolve(root);
-  const { mode, files } = listFiles(root);
+  let { mode, files } = listFiles(root);
+  if (staged && mode !== 'git') {
+    throw new Error('Режим --staged работает только внутри git-репозитория.');
+  }
+  const stagedSet = staged ? new Set(listStagedFiles(root)) : null;
+  if (staged) mode = 'staged';
   const findings = [];
   const notes = [];
   const sqlFiles = [];
@@ -252,25 +279,31 @@ export function scanProject(root, { exclude = [] } = {}) {
 
   const ignoreText = readText(path.join(root, IGNORE_FILE));
   const isExcluded = compileIgnore([...(ignoreText ? parseIgnoreFile(ignoreText) : []), ...exclude]);
+  const isSql = (rel) => rel.toLowerCase().endsWith('.sql');
 
   for (const rel of files) {
     if (shouldSkip(rel)) continue;
-    if (isExcluded(rel)) { excluded++; continue; }
+    if (isExcluded(rel)) { if (!stagedSet || stagedSet.has(rel)) excluded++; continue; }
+    const isStaged = !stagedSet || stagedSet.has(rel);
+    // В режиме --staged остальные SQL-файлы читаем только как контекст:
+    // RLS может быть включён в старой миграции.
+    if (!isStaged && !isSql(rel)) continue;
     const base = path.basename(rel);
 
     const envFile = isEnvFile(base);
-    if (envFile && mode === 'git') findings.push(makeFinding(envFileRule, rel, null));
+    if (envFile && mode !== 'folder' && isStaged) findings.push(makeFinding(envFileRule, rel, null));
 
-    const content = readText(path.join(root, rel));
+    const content = stagedSet?.has(rel) ? readStaged(root, rel) : readText(path.join(root, rel));
     if (content === null) continue;
+    if (isSql(rel)) sqlFiles.push({ rel, content });
+    if (!isStaged) continue;
     scanned++;
 
-    if (envFile && mode !== 'git') {
+    if (envFile && mode === 'folder') {
       scanEnvFile(rel, content, findings);
       continue;
     }
     scanSecrets(rel, content, findings);
-    if (rel.toLowerCase().endsWith('.sql')) sqlFiles.push({ rel, content });
   }
 
   scanSqlFiles(sqlFiles, findings);
@@ -284,16 +317,26 @@ export function scanProject(root, { exclude = [] } = {}) {
     }));
   }
 
+  // В режиме --staged сообщаем только о файлах из коммита
+  // (.gitignore — только если он сам в коммите).
+  let result = findings;
+  if (stagedSet) {
+    result = findings.filter((f) => stagedSet.has(f.file));
+    notes.push(stagedSet.size === 0
+      ? 'В индексе нет файлов для проверки (git add ещё не выполнялся).'
+      : `Проверены только файлы из будущего коммита: ${scanned}.`);
+  }
+
   if (mode === 'folder') {
     notes.push('Папка не является git-репозиторием: проверены все файлы, а в .env-файлах — только публичные переменные (NEXT_PUBLIC_, VITE_ и т.п.).');
   }
   if (excluded > 0) {
     notes.push(`Исключено файлов: ${excluded} (${IGNORE_FILE} / --exclude).`);
   }
-  if (sqlFiles.length === 0) {
+  if (sqlFiles.length === 0 && !stagedSet) {
     notes.push('SQL-миграции не найдены: проверка RLS не выполнялась. Для Supabase это обычно папка supabase/migrations.');
   }
 
-  findings.sort((a, b) => SEVERITY_ORDER[a.severity] - SEVERITY_ORDER[b.severity]);
-  return { root, mode, filesScanned: scanned, findings, notes };
+  result.sort((a, b) => SEVERITY_ORDER[a.severity] - SEVERITY_ORDER[b.severity]);
+  return { root, mode, filesScanned: scanned, findings: result, notes };
 }

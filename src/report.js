@@ -11,10 +11,12 @@ const LABEL = {
   low: `${C.bold}${C.blue}НИЗКИЙ${C.reset}`,
 };
 
+const MODE_LABEL = { git: 'git-репозиторий', staged: 'только файлы коммита (--staged)', folder: 'обычная папка' };
+
 export function printReport(result) {
   const { root, mode, filesScanned, findings, notes } = result;
   console.log(`\n${C.bold}🔍 Vibe Scanner${C.reset}  ${C.dim}${root}${C.reset}`);
-  console.log(`${C.dim}Режим: ${mode === 'git' ? 'git-репозиторий' : 'обычная папка'} · проверено файлов: ${filesScanned}${C.reset}\n`);
+  console.log(`${C.dim}Режим: ${MODE_LABEL[mode]} · проверено файлов: ${filesScanned}${C.reset}\n`);
 
   if (findings.length === 0) {
     console.log(`${C.green}${C.bold}✅ Проблем не найдено.${C.reset}\n`);
