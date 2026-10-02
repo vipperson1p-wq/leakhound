@@ -1,0 +1,49 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    name: Tests (Node ${{ matrix.node }}, ${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest]
+        node: [18, 20, 22, 24]
+        include:
+          - os: windows-latest
+            node: 24
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node }}
+      - run: npm test
+
+  self-scan:
+    name: Self-scan
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+
+      # Сканер должен проходить на собственном коде (test-project/ исключён в .vibescanignore)
+      - name: Scan own code
+        run: node src/index.js .
+
+      # Защита от «тихой» поломки: на дырявой фикстуре сканер обязан упасть
+      - name: Fixture must fail the scan
+        run: |
+          if node src/index.js test-project; then
+            echo "::error::Scanner found nothing serious in test-project/ — detection is broken"
+            exit 1
+          fi
