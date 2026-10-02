@@ -10,6 +10,7 @@
     node src/index.js /путь/к/проекту --json    # вывод для AI-слоя и сайта
     node src/index.js . --exclude fixtures/     # пропустить папку (флаг можно повторять)
     node src/index.js --staged                   # только файлы из git add (то, что уйдёт в коммит)
+    node src/index.js install-hook               # pre-commit хук: блокирует коммит при критичных проблемах
     npm test                                     # юнит-тесты (node:test)
     npm run scan:fixture                         # прогон на тестовом «дырявом» проекте
     npm run scan:self                            # самопроверка сканером
