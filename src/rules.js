@@ -79,6 +79,12 @@ export const secretRules = [
   },
 ];
 
+// Известные фейковые ключи из официальной документации — не сообщаем о них.
+export const KNOWN_EXAMPLE_KEYS = new Set([
+  'AKIAIOSFODNN7EXAMPLE', // AWS docs
+  'AKIAI44QH8DHBEXAMPLE', // AWS docs
+]);
+
 // JWT обрабатываем отдельно: декодируем и смотрим роль.
 // anon-ключ Supabase публичен по задумке, а service_role — нет.
 export const jwtRegex = /\beyJ[A-Za-z0-9_-]{10,}\.eyJ[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]{10,}/g;

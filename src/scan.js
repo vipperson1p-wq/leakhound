@@ -3,7 +3,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import {
   secretRules, jwtRegex, serviceRoleRule, publicEnvRule, genericSecretRule,
-  envFileRule, gitignoreRule, rlsMissingRule, permissivePolicyRule, SEVERITY_ORDER,
+  envFileRule, gitignoreRule, rlsMissingRule, permissivePolicyRule, SEVERITY_ORDER, KNOWN_EXAMPLE_KEYS,
 } from './rules.js';
 import { IGNORE_FILE, parseIgnoreFile, compileIgnore } from './ignore.js';
 
@@ -125,6 +125,7 @@ export function scanSecrets(rel, content, findings = []) {
 
   for (const rule of secretRules) {
     for (const m of content.matchAll(rule.regex)) {
+      if (KNOWN_EXAMPLE_KEYS.has(m[0])) continue;
       const key = `${m.index}`;
       if (reported.has(key)) continue;
       reported.add(key);

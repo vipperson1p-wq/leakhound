@@ -277,3 +277,9 @@ describe('.env files outside git', () => {
     assert.deepEqual(scanProject(dir).findings, []);
   });
 });
+
+describe('known example keys', () => {
+  test('AWS documentation example key is NOT reported', () => {
+    assert.deepEqual(scanSecrets('README.md', j('key: AK', 'IAIOSFODNN7', 'EXAMPLE')), []);
+  });
+});
