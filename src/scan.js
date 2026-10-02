@@ -165,6 +165,34 @@ export function scanSecrets(rel, content, findings = []) {
   return findings;
 }
 
+
+// .env в обычной папке (не в git) — нормальное место для секретов.
+// Проверяем только публичные переменные: они попадут в браузер.
+const PUBLIC_ENV_PREFIX = /^(?:NEXT_PUBLIC_|VITE_|REACT_APP_|EXPO_PUBLIC_|PUBLIC_)/;
+
+export function scanEnvFile(rel, content, findings = []) {
+  const reported = new Set();
+  for (const m of content.matchAll(publicEnvRule.regex)) {
+    const lineNo = lineOf(content, m.index);
+    reported.add(lineNo);
+    const safe = snippet(content, m.index).replace(/([=:]\s*["'`]?)([^\s"'`,;)]{4,})/, '$1…****');
+    findings.push(makeFinding(publicEnvRule, rel, lineNo, { snippet: safe }));
+  }
+
+  content.split('\n').forEach((line, i) => {
+    const m = line.match(/^\s*(?:export\s+)?([A-Z0-9_]+)\s*=\s*["']?([^"'\s#]*)/);
+    if (!m || !PUBLIC_ENV_PREFIX.test(m[1]) || reported.has(i + 1)) return;
+    const value = m[2];
+    if (new RegExp(`^${jwtRegex.source}$`).test(value) && decodeJwtPayload(value)?.role === 'service_role') {
+      findings.push(makeFinding(serviceRoleRule, rel, i + 1, {
+        snippet: `${m[1]}=${mask(value)}`,
+        clientSide: true,
+        why: `В публичной переменной ${m[1]} лежит ключ service_role, а не anon. Он попадёт в браузер, и любой посетитель получит полный доступ к базе в обход RLS.`,
+      }));
+    }
+  });
+  return findings;
+}
 // SQL-проверки собираем по всем файлам сразу: таблица может быть создана
 // в одной миграции, а RLS включён в другой.
 const normTable = (name) => name.replace(/"/g, '').toLowerCase().replace(/^public\./, '');
@@ -222,18 +250,17 @@ export function scanProject(root) {
     if (shouldSkip(rel)) continue;
     const base = path.basename(rel);
 
-    if (isEnvFile(base)) {
-      if (mode === 'git') {
-        findings.push(makeFinding(envFileRule, rel, null));
-      } else {
-        continue; // в обычной папке .env — это нормально, проверяем только .gitignore
-      }
-    }
+    const envFile = isEnvFile(base);
+    if (envFile && mode === 'git') findings.push(makeFinding(envFileRule, rel, null));
 
     const content = readText(path.join(root, rel));
     if (content === null) continue;
     scanned++;
 
+    if (envFile && mode !== 'git') {
+      scanEnvFile(rel, content, findings);
+      continue;
+    }
     scanSecrets(rel, content, findings);
     if (rel.toLowerCase().endsWith('.sql')) sqlFiles.push({ rel, content });
   }
@@ -250,7 +277,7 @@ export function scanProject(root) {
   }
 
   if (mode === 'folder') {
-    notes.push('Папка не является git-репозиторием: проверены все файлы, а .env-файлы пропущены.');
+    notes.push('Папка не является git-репозиторием: проверены все файлы, а в .env-файлах — только публичные переменные (NEXT_PUBLIC_, VITE_ и т.п.).');
   }
   if (sqlFiles.length === 0) {
     notes.push('SQL-миграции не найдены: проверка RLS не выполнялась. Для Supabase это обычно папка supabase/migrations.');

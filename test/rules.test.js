@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
-import { scanSecrets, scanSqlFiles, scanProject } from '../src/scan.js';
+import { scanSecrets, scanSqlFiles, scanEnvFile, scanProject } from '../src/scan.js';
 
 // Fake secrets are assembled at runtime so this file itself
 // does not trigger the scanner during self-check.
@@ -233,5 +233,47 @@ describe('scanProject', () => {
     ]) {
       assert.ok(found.has(id), `missing ${id}`);
     }
+  });
+});
+
+describe('.env files outside git', () => {
+  const pub = (name) => j('NEXT_PUBLIC_', name);
+  const tmp = () => fs.mkdtempSync(path.join(os.tmpdir(), 'vibescan-'));
+
+  test('secret in public variable is detected in folder mode', () => {
+    const dir = tmp();
+    fs.writeFileSync(path.join(dir, '.gitignore'), '.env*\n');
+    fs.writeFileSync(path.join(dir, '.env.local'), `${pub('OPEN' + 'AI_API_KEY')}=abc123\n`);
+    const r = scanProject(dir);
+    assert.deepEqual(ids(r.findings), ['public-env-secret']);
+    assert.equal(r.findings[0].file, '.env.local');
+  });
+
+  test('server-only secrets in .env are NOT reported in folder mode', () => {
+    const dir = tmp();
+    fs.writeFileSync(path.join(dir, '.gitignore'), '.env*\n');
+    fs.writeFileSync(path.join(dir, '.env'), [
+      j('OPEN', 'AI_API_KEY=', FAKE['openai-key']),
+      j('SUPABASE_SERVICE', '_ROLE_KEY=', jwt('service_role')),
+    ].join('\n'));
+    assert.deepEqual(scanProject(dir).findings, []);
+  });
+
+  test('service_role JWT in public variable is detected', () => {
+    const found = scanEnvFile('.env', `${pub('SUPABASE_ANON_KEY')}="${jwt('service_role')}"\n`);
+    assert.deepEqual(ids(found), ['supabase-service-role']);
+    assert.equal(found[0].clientSide, true);
+    assert.ok(!found[0].snippet.includes(jwt('service_role')));
+  });
+
+  test('anon JWT in public variable is NOT reported', () => {
+    assert.deepEqual(scanEnvFile('.env', `${pub('SUPABASE_ANON_KEY')}=${jwt('anon')}\n`), []);
+  });
+
+  test('.env.example is treated as regular file', () => {
+    const dir = tmp();
+    fs.writeFileSync(path.join(dir, '.gitignore'), '.env*\n');
+    fs.writeFileSync(path.join(dir, '.env.example'), j('OPEN', 'AI_API_KEY=your-key-here\n'));
+    assert.deepEqual(scanProject(dir).findings, []);
   });
 });
