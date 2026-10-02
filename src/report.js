@@ -34,5 +34,11 @@ export function printReport(result) {
   const count = (s) => findings.filter((f) => f.severity === s).length;
   console.log(`${C.bold}Итого:${C.reset} ${count('critical')} критичных · ${count('high')} высоких · ${count('medium')} средних · ${count('low')} низких`);
   for (const n of notes) console.log(`${C.dim}ℹ️  ${n}${C.reset}`);
+
+  // В режиме хука не засоряем вывод — список виден при обычном запуске
+  if (mode !== 'staged' && result.notChecked?.length) {
+    console.log(`\n${C.bold}Что сканер НЕ проверяет${C.reset} ${C.dim}(«проблем не найдено» ≠ «проект безопасен»):${C.reset}`);
+    for (const { what, hint } of result.notChecked) console.log(`${C.dim}  • ${what} — ${hint}${C.reset}`);
+  }
   console.log();
 }

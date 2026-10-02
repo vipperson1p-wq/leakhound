@@ -283,3 +283,11 @@ describe('known example keys', () => {
     assert.deepEqual(scanSecrets('README.md', j('key: AK', 'IAIOSFODNN7', 'EXAMPLE')), []);
   });
 });
+
+describe('report metadata', () => {
+  test('result lists what the scanner does NOT check', () => {
+    const r = scanProject('test-project');
+    assert.ok(Array.isArray(r.notChecked) && r.notChecked.length >= 5);
+    assert.ok(r.notChecked.some((x) => /git/i.test(x.what)));
+  });
+});

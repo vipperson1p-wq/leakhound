@@ -4,6 +4,7 @@ import path from 'node:path';
 import {
   secretRules, jwtRegex, serviceRoleRule, publicEnvRule, genericSecretRule,
   envFileRule, gitignoreRule, rlsMissingRule, permissivePolicyRule, SEVERITY_ORDER, KNOWN_EXAMPLE_KEYS,
+  NOT_CHECKED,
 } from './rules.js';
 import { IGNORE_FILE, parseIgnoreFile, compileIgnore } from './ignore.js';
 
@@ -338,5 +339,5 @@ export function scanProject(root, { exclude = [], staged = false } = {}) {
   }
 
   result.sort((a, b) => SEVERITY_ORDER[a.severity] - SEVERITY_ORDER[b.severity]);
-  return { root, mode, filesScanned: scanned, findings: result, notes };
+  return { root, mode, filesScanned: scanned, findings: result, notes, notChecked: NOT_CHECKED };
 }
