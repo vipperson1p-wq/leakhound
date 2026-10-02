@@ -5,6 +5,7 @@ import {
   secretRules, jwtRegex, serviceRoleRule, publicEnvRule, genericSecretRule,
   envFileRule, gitignoreRule, rlsMissingRule, permissivePolicyRule, SEVERITY_ORDER,
 } from './rules.js';
+import { IGNORE_FILE, parseIgnoreFile, compileIgnore } from './ignore.js';
 
 const IGNORED_DIRS = new Set([
   'node_modules', '.git', '.next', 'dist', 'build', 'out', '.vercel',
@@ -238,16 +239,22 @@ export function scanSqlFiles(sqlFiles, findings = []) {
 
 // ---------- Главная функция ----------
 
-export function scanProject(root) {
+// options.exclude — шаблоны из --exclude, дополняют .vibescanignore
+export function scanProject(root, { exclude = [] } = {}) {
   root = path.resolve(root);
   const { mode, files } = listFiles(root);
   const findings = [];
   const notes = [];
   const sqlFiles = [];
   let scanned = 0;
+  let excluded = 0;
+
+  const ignoreText = readText(path.join(root, IGNORE_FILE));
+  const isExcluded = compileIgnore([...(ignoreText ? parseIgnoreFile(ignoreText) : []), ...exclude]);
 
   for (const rel of files) {
     if (shouldSkip(rel)) continue;
+    if (isExcluded(rel)) { excluded++; continue; }
     const base = path.basename(rel);
 
     const envFile = isEnvFile(base);
@@ -278,6 +285,9 @@ export function scanProject(root) {
 
   if (mode === 'folder') {
     notes.push('Папка не является git-репозиторием: проверены все файлы, а в .env-файлах — только публичные переменные (NEXT_PUBLIC_, VITE_ и т.п.).');
+  }
+  if (excluded > 0) {
+    notes.push(`Исключено файлов: ${excluded} (${IGNORE_FILE} / --exclude).`);
   }
   if (sqlFiles.length === 0) {
     notes.push('SQL-миграции не найдены: проверка RLS не выполнялась. Для Supabase это обычно папка supabase/migrations.');
