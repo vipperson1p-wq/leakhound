@@ -26,7 +26,7 @@ npx vibecode-scanner .
 
 ```bash
 npm install -D vibecode-scanner
-npx vibe-scanner install-hook
+npx vibecode-scanner install-hook
 ```
 
 Пакет называется `vibecode-scanner`, а команда, которую он ставит, — `vibe-scanner`.

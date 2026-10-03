@@ -24,7 +24,7 @@ describe('--help', () => {
       assert.equal(r.stderr, '');
       assert.ok(r.stdout.includes(`vibecode-scanner ${VERSION}`));
       for (const item of ['--staged', '--history', 'install-hook', 'install-skill', 'mcp',
-        '--json', '--exclude', '--lang', '--force', '--version', 'npx vibe-scanner']) {
+        '--json', '--exclude', '--lang', '--force', '--version', 'npx vibecode-scanner']) {
         assert.ok(r.stdout.includes(item), `help mentions ${item}`);
       }
     });

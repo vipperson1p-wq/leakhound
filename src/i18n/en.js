@@ -197,11 +197,12 @@ Options:
   -v, --version         Show the version
 
 Exit codes: 0 — no critical/high findings, 1 — critical/high found, 2 — usage error.
+Without installing, run any command as: npx vibecode-scanner <command>
 
 Examples:
-  npx vibe-scanner .
-  npx vibe-scanner --staged --lang ru
-  npx vibe-scanner . --json --exclude docs/
+  npx vibecode-scanner .
+  npx vibecode-scanner --staged --lang ru
+  npx vibecode-scanner . --json --exclude docs/
 
 More: https://github.com/vipperson1p-wq/vibecode-scanner`,
   },

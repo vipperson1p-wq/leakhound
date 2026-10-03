@@ -28,7 +28,7 @@ To block commits that contain keys, add it to the project and install the pre-co
 
 ```bash
 npm install -D vibecode-scanner
-npx vibe-scanner install-hook
+npx vibecode-scanner install-hook
 ```
 
 The package is called `vibecode-scanner`; the command it installs is `vibe-scanner`.

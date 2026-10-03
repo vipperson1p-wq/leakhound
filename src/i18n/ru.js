@@ -197,11 +197,12 @@ export default {
   -v, --version         Показать версию
 
 Коды выхода: 0 — нет critical/high, 1 — найдены critical/high, 2 — ошибка в аргументах.
+Без установки любую команду можно запустить так: npx vibecode-scanner <команда>
 
 Примеры:
-  npx vibe-scanner .
-  npx vibe-scanner --staged --lang ru
-  npx vibe-scanner . --json --exclude docs/
+  npx vibecode-scanner .
+  npx vibecode-scanner --staged --lang ru
+  npx vibecode-scanner . --json --exclude docs/
 
 Подробнее: https://github.com/vipperson1p-wq/vibecode-scanner`,
   },
