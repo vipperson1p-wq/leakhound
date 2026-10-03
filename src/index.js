@@ -6,8 +6,8 @@
 // Language: --lang → VIBESCAN_LANG → LC_ALL / LC_MESSAGES / LANG → system locale → English.
 import { printReport } from './report.js';
 import { installHook } from './hook.js';
-import { scan, hasSeriousFindings } from './api.js';
-import { detectLang, createT, ScanError } from './i18n/index.js';
+import { scanRaw, hasSeriousFindings } from './api.js';
+import { detectLang, createT, ScanError, localizeResult } from './i18n/index.js';
 
 const argv = process.argv.slice(2);
 
@@ -110,15 +110,15 @@ if (argv[0] === 'install-hook') {
 const opts = parseArgs(argv);
 let result;
 try {
-  result = await scan(opts.target, { lang, staged: opts.staged, history: opts.history, exclude: opts.exclude });
+  result = await scanRaw(opts.target, { staged: opts.staged, history: opts.history, exclude: opts.exclude });
 } catch (e) {
   fail(e);
 }
 
 if (opts.json) {
-  console.log(JSON.stringify(result, null, 2));
+  console.log(JSON.stringify(localizeResult(result, lang), null, 2));
 } else {
-  printReport(result, t);
+  printReport(result, lang);
 }
 
 // Exit code 1 on critical/high findings — handy for CI and the pre-commit hook

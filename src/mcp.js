@@ -13,8 +13,8 @@ import os from 'node:os';
 import path from 'node:path';
 import readline from 'node:readline';
 import { fileURLToPath } from 'node:url';
-import { scan } from './api.js';
-import { createT, detectLang, LANGS, ScanError } from './i18n/index.js';
+import { scanRaw } from './api.js';
+import { createT, detectLang, LANGS, ScanError, groupFindings, localizeResult } from './i18n/index.js';
 
 export const MODERN_VERSIONS = ['2026-07-28'];
 export const LEGACY_VERSIONS = ['2025-11-25', '2025-06-18', '2025-03-26', '2024-11-05'];
@@ -42,30 +42,43 @@ export const sanitize = (value, max = 200) => {
 };
 const data = (value) => `<repository-data>${sanitize(value)}</repository-data>`;
 
-export function formatResult(result, t, displayPath) {
-  const count = (s) => result.findings.filter((f) => f.severity === s).length;
+// Takes a raw result; findings of the same kind are grouped like in the terminal report
+export function formatResult(raw, lang, displayPath) {
+  const t = createT(lang);
+  const { notes, notChecked } = localizeResult(raw, lang);
+  const count = (s) => raw.findings.filter((f) => f.severity === s).length;
   const counts = t('report.counts', { critical: count('critical'), high: count('high'), medium: count('medium'), low: count('low') });
   const lines = [
     t('mcp.header', { path: displayPath }),
-    `${t('report.mode')}: ${t(`report.modes.${result.mode}`)} · ${t('report.filesScanned')}: ${result.filesScanned}`,
-    result.findings.length ? t('mcp.found', { counts }) : t('mcp.clean'),
+    `${t('report.mode')}: ${t(`report.modes.${raw.mode}`)} · ${t('report.filesScanned')}: ${raw.filesScanned}`,
+    raw.findings.length ? t('mcp.found', { counts }) : t('mcp.clean'),
   ];
-  if (result.findings.length) lines.push('', t('mcp.dataNotice'));
+  if (raw.findings.length) lines.push('', t('mcp.dataNotice'));
 
-  result.findings.slice(0, MAX_FINDINGS).forEach((f, i) => {
-    const loc = f.line ? `${f.file}:${f.line}` : f.file;
-    lines.push('', `${i + 1}. [${t(`severity.${f.severity}`)}] ${f.title} (${f.ruleId})`);
-    lines.push(`   ${t('mcp.file')}: ${data(loc)}${f.clientSide ? ` — ${t('mcp.clientSide')}` : ''}`);
-    if (f.snippet) lines.push(`   ${t('mcp.code')}: ${data(f.snippet)}`);
-    if (f.commit) lines.push(`   ${t('mcp.commit')}: ${f.commit.short} (${f.commit.date}) ${data(f.commit.subject)}`);
-    lines.push(`   ${t('mcp.why')}: ${f.why}`);
-    lines.push(`   ${t('mcp.fix')}: ${f.fix.replace(/\n/g, ' | ')}`);
-  });
-  if (result.findings.length > MAX_FINDINGS) {
-    lines.push('', t('mcp.more', { count: result.findings.length - MAX_FINDINGS }));
+  const place = (x) => {
+    const loc = x.line ? `${x.file}:${x.line}` : x.file;
+    const out = [`${t('mcp.file')}: ${data(loc)}${x.clientSide ? ` — ${t('mcp.clientSide')}` : ''}`];
+    if (x.snippet) out.push(`${t('mcp.code')}: ${data(x.snippet)}`);
+    if (x.commit) out.push(`${t('mcp.commit')}: ${x.commit.short} (${x.commit.date}) ${data(x.commit.subject)}`);
+    return out;
+  };
+
+  let shown = 0;
+  for (const [i, g] of groupFindings(raw.findings, t).entries()) {
+    if (shown >= MAX_FINDINGS) break;
+    const times = g.count > 1 ? ` ×${g.count}` : '';
+    lines.push('', `${i + 1}. [${t(`severity.${g.severity}`)}] ${g.title} (${g.ruleId})${times}`);
+    lines.push(`   ${t('mcp.why')}: ${g.why}`);
+    lines.push(`   ${t('mcp.fix')}: ${g.fix.replace(/\n/g, ' | ')}`);
+    for (const x of g.items.slice(0, MAX_FINDINGS - shown)) {
+      const [first, ...rest] = place(x);
+      lines.push(`   - ${first}`, ...rest.map((r) => `     ${r}`));
+      shown++;
+    }
   }
-  if (result.notes.length) lines.push('', `${t('mcp.notes')}:`, ...result.notes.map((n) => `- ${n}`));
-  lines.push('', `${t('mcp.notChecked')}:`, ...result.notChecked.map((x) => `- ${x.what} — ${x.hint}`));
+  if (raw.findings.length > shown) lines.push('', t('mcp.more', { count: raw.findings.length - shown }));
+  if (notes.length) lines.push('', `${t('mcp.notes')}:`, ...notes.map((n) => `- ${n}`));
+  lines.push('', `${t('mcp.notChecked')}:`, ...notChecked.map((x) => `- ${x.what} — ${x.hint}`));
   return lines.join('\n');
 }
 
@@ -114,8 +127,8 @@ async function callTool(params, ctx) {
   const { target, error } = resolveProject(ctx.cwd, args.path, t);
   if (error) return toolError(error);
   try {
-    const result = await scan(target, { lang, exclude: args.exclude ?? [], ...TOOLS[name] });
-    return { content: [{ type: 'text', text: formatResult(result, t, target) }], isError: false };
+    const raw = await scanRaw(target, { exclude: args.exclude ?? [], ...TOOLS[name] });
+    return { content: [{ type: 'text', text: formatResult(raw, lang, target) }], isError: false };
   } catch (e) {
     return toolError(e instanceof ScanError ? t(`errors.${e.key}`, e.params) : `vibe-scanner: ${e.message}`);
   }

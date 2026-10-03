@@ -24,11 +24,13 @@ const lookup = (dict, key) => key.split('.').reduce((o, k) => (o == null ? undef
 
 export function createT(lang = DEFAULT_LANG) {
   const dict = DICTIONARIES[lang] ?? DICTIONARIES[DEFAULT_LANG];
-  return (key, params) => {
+  const t = (key, params) => {
     const s = lookup(dict, key) ?? lookup(en, key);
     if (typeof s !== 'string') throw new Error(`Missing translation: ${key}`);
     return format(s, params);
   };
+  t.has = (key) => typeof (lookup(dict, key) ?? lookup(en, key)) === 'string';
+  return t;
 }
 
 // Language from a locale string like "ru_RU.UTF-8" or "ru-RU"; null if it says nothing
@@ -67,6 +69,46 @@ export function localizeFinding(f, t) {
   const snippet = f.snippetKey ? t(`snippets.${f.snippetKey}`, f.params) : f.snippet;
   const { variant, snippetKey, ...rest } = f;
   return { ...rest, snippet, title, why, fix };
+}
+
+// Groups raw findings of the same kind for human-readable output (terminal, MCP):
+// title, "why" and "fix" once, then the list of places. --json keeps findings separate.
+// Same kind = same rule, severity, variant and source (history findings stay apart).
+export function groupFindings(findings, t) {
+  const byKind = new Map();
+  for (const f of findings) {
+    const key = [f.ruleId, f.severity, f.variant ?? '', f.source ?? ''].join('|');
+    if (!byKind.has(key)) byKind.set(key, []);
+    byKind.get(key).push(f);
+  }
+  return [...byKind.values()].map((raw) => {
+    const first = localizeFinding(raw[0], t);
+    const group = raw.length > 1;
+    const items = raw.map((f) => {
+      const itemKey = f.snippetKey && `snippets.${f.snippetKey}_item`;
+      const snippet = group && itemKey && t.has(itemKey) ? t(itemKey, f.params) : localizeFinding(f, t).snippet;
+      return { file: f.file, line: f.line, snippet, clientSide: f.clientSide, commit: f.commit };
+    });
+    return {
+      ruleId: first.ruleId,
+      severity: first.severity,
+      source: first.source,
+      title: first.title,
+      why: group ? groupWhy(raw[0], first, t) : first.why,
+      fix: first.fix,
+      count: raw.length,
+      items,
+    };
+  });
+}
+
+function groupWhy(f, localized, t) {
+  const base = `rules.${f.ruleId}`;
+  if (f.source === 'history' && f.ruleId !== 'env-file-in-history') {
+    return `${t(`${base}.why`)} ${t('history.whyGroup')}`;
+  }
+  const groupKey = `${base}.${f.variant ? `why_${f.variant}` : 'why'}_group`;
+  return t.has(groupKey) ? t(groupKey) : localized.why;
 }
 
 // A raw scan result → the same result with texts in the chosen language
