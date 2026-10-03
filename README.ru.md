@@ -16,26 +16,36 @@
 
 ## Быстрый старт
 
-Нужен Node.js 18+. Зависимостей нет.
+Нужен Node.js 18+. Зависимостей нет. Запусти в папке своего проекта:
 
 ```bash
-git clone https://github.com/vipperson1p-wq/vibecode-scanner.git
-cd vibecode-scanner
-node src/index.js /путь/к/твоему/проекту
+npx vibecode-scanner .
 ```
 
-> В npm пока не опубликован — запускай из исходников.
+Чтобы коммиты с ключами блокировались, добавь сканер в проект и поставь pre-commit хук:
+
+```bash
+npm install -D vibecode-scanner
+npx vibe-scanner install-hook
+```
+
+Пакет называется `vibecode-scanner`, а команда, которую он ставит, — `vibe-scanner`.
 
 ## Запуск
 
 ```bash
-node src/index.js <путь>                      # проверить проект
-node src/index.js <путь> --json               # вывод для программ (AI-слой, сайт)
-node src/index.js <путь> --history            # плюс ключи, удалённые из файлов, но оставшиеся в истории git
-node src/index.js <путь> --exclude fixtures/  # пропустить путь (флаг можно повторять)
-node src/index.js --staged                    # только файлы из git add (то, что уйдёт в коммит)
-node src/index.js install-hook [путь]         # pre-commit хук: блокирует коммит при критичных проблемах
+vibe-scanner <путь>                      # проверить проект
+vibe-scanner <путь> --json               # вывод для программ (AI-слой, сайт)
+vibe-scanner <путь> --history            # плюс ключи, удалённые из файлов, но оставшиеся в истории git
+vibe-scanner <путь> --exclude fixtures/  # пропустить путь (флаг можно повторять)
+vibe-scanner --staged                    # только файлы из git add (то, что уйдёт в коммит)
+vibe-scanner install-hook [путь]         # pre-commit хук: блокирует коммит при критичных проблемах
 ```
+
+Без установки — `npx vibecode-scanner` вместо `vibe-scanner`.
+
+Хук запускает сканер из `node_modules/.bin`, если пакет установлен в проект, иначе — через
+`npx vibecode-scanner@<версия>` (версия закреплена: та, что ставила хук; новую сам не скачивает).
 
 Код выхода: `1` — есть критичные или высокие находки, `0` — нет, `2` — ошибка в аргументах.
 Поэтому сканер можно сразу ставить в CI.
@@ -92,7 +102,12 @@ test-project/      # папка на любой глубине
 
 ## Для разработчиков
 
+Из исходников:
+
 ```bash
+git clone https://github.com/vipperson1p-wq/vibecode-scanner.git
+cd vibecode-scanner
+node src/index.js /путь/к/проекту
 npm test               # тесты (node:test)
 npm run scan:fixture   # прогон на намеренно «дырявом» test-project/
 npm run scan:self      # самопроверка сканером

@@ -18,26 +18,37 @@ Keys are **always masked** in the output (`sk-pro…****`).
 
 ## Quick start
 
-Requires Node.js 18+. No dependencies.
+Requires Node.js 18+. No dependencies. Run it in your project folder:
 
 ```bash
-git clone https://github.com/vipperson1p-wq/vibecode-scanner.git
-cd vibecode-scanner
-node src/index.js /path/to/your/project
+npx vibecode-scanner .
 ```
 
-> Not published to npm yet — run it from source for now.
+To block commits that contain keys, add it to the project and install the pre-commit hook:
+
+```bash
+npm install -D vibecode-scanner
+npx vibe-scanner install-hook
+```
+
+The package is called `vibecode-scanner`; the command it installs is `vibe-scanner`.
 
 ## Usage
 
 ```bash
-node src/index.js <path>                     # scan a project
-node src/index.js <path> --json              # machine-readable output
-node src/index.js <path> --history           # also scan git history for removed keys
-node src/index.js <path> --exclude fixtures/ # skip paths (repeatable)
-node src/index.js --staged                   # only files staged for commit
-node src/index.js install-hook [path]        # pre-commit hook: block commits with critical/high findings
+vibe-scanner <path>                     # scan a project
+vibe-scanner <path> --json              # machine-readable output
+vibe-scanner <path> --history           # also scan git history for removed keys
+vibe-scanner <path> --exclude fixtures/ # skip paths (repeatable)
+vibe-scanner --staged                   # only files staged for commit
+vibe-scanner install-hook [path]        # pre-commit hook: block commits with critical/high findings
 ```
+
+Without installing, use `npx vibecode-scanner` instead of `vibe-scanner`.
+
+The pre-commit hook runs the scanner from `node_modules/.bin` if the package is installed
+in the project, otherwise via `npx vibecode-scanner@<version>` (pinned to the version that
+installed the hook — it never pulls a newer release on its own).
 
 Exit code: `1` if there are critical or high findings, `0` otherwise, `2` on usage errors —
 so it works in CI as is.

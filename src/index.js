@@ -40,12 +40,13 @@ if (argv[0] === 'install-hook') {
   const unknown = rest.find((a) => a.startsWith('--') && a !== '--force');
   if (unknown) fail(`Неизвестный флаг: ${unknown}`);
   try {
-    const { hookPath, backupPath } = installHook(rest.find((a) => !a.startsWith('--')) || '.', {
+    const { hookPath, backupPath, runner } = installHook(rest.find((a) => !a.startsWith('--')) || '.', {
       force: rest.includes('--force'),
     });
     if (backupPath) console.log(`Старый хук сохранён: ${backupPath}`);
     console.log(`✅ pre-commit хук установлен: ${hookPath}`);
     console.log('Теперь перед каждым коммитом проверяются добавленные файлы. Коммит блокируется при критичных и высоких проблемах.');
+    console.log(`Запуск сканера: node_modules/.bin/vibe-scanner, если пакет установлен в проект, иначе — ${runner}.`);
     process.exit(0);
   } catch (e) {
     fail(e.message);
