@@ -100,3 +100,41 @@ test('hook message says it blocks on critical and high, in both languages', () =
   assert.match(en.hook.blocked, /critical or high/);
   assert.match(ru.hook.blocked, new RegExp(`${ru.severity.critical} или ${ru.severity.high}`));
 });
+
+describe('security headers (site/vercel.json)', () => {
+  const config = JSON.parse(fs.readFileSync('site/vercel.json', 'utf8'));
+  const headers = Object.fromEntries(config.headers.find((h) => h.source === '/(.*)').headers.map((h) => [h.key, h.value]));
+  const csp = Object.fromEntries(headers['Content-Security-Policy'].split(';').map((d) => d.trim().split(/\s+/)).map(([k, ...v]) => [k, v]));
+
+  test('CSP allows only what the pages load', () => {
+    assert.deepEqual(csp, {
+      'default-src': ["'none'"],
+      'script-src': ["'self'"],
+      'style-src': ["'self'", 'https://fonts.googleapis.com'],
+      'font-src': ['https://fonts.gstatic.com'],
+      'img-src': ["'self'", 'data:'],
+      'base-uri': ["'none'"],
+      'form-action': ["'none'"],
+      'frame-ancestors': ["'none'"],
+    });
+    assert.doesNotMatch(headers['Content-Security-Policy'], /unsafe-|\*/);
+  });
+
+  test('the other headers are set', () => {
+    assert.equal(headers['X-Content-Type-Options'], 'nosniff');
+    assert.equal(headers['Referrer-Policy'], 'strict-origin-when-cross-origin');
+    assert.equal(headers['X-Frame-Options'], 'DENY');
+  });
+
+  for (const page of PAGES) {
+    test(`${page} works under that CSP: no inline code, outside loads only from allowed hosts`, () => {
+      const src = html[page];
+      assert.doesNotMatch(src, /<script(?![^>]*\ssrc=)[^>]*>/, 'no inline <script>');
+      assert.doesNotMatch(src, /\sstyle="/, 'no style attributes');
+      assert.doesNotMatch(src, /\son[a-z]+="/, 'no inline event handlers');
+      for (const [, url] of src.matchAll(/<(?:script|link)[^>]*\s(?:src|href)="(https?:\/\/[^"]+)"/g)) {
+        assert.ok(/^https:\/\/fonts\.(googleapis|gstatic)\.com/.test(url), `unexpected external resource: ${url}`);
+      }
+    });
+  }
+});
