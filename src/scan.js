@@ -46,6 +46,20 @@ export function listFiles(root) {
   }
 }
 
+// .env-файлы, скрытые через .gitignore. В git они не попадут, но публичные
+// переменные (NEXT_PUBLIC_ и т.п.) из них всё равно уходят в браузер.
+// --directory сворачивает игнорируемые папки (node_modules), их не обходим.
+function listIgnoredEnvFiles(root) {
+  try {
+    const out = execFileSync('git', ['ls-files', '-z', '--others', '--ignored', '--exclude-standard', '--directory'], {
+      cwd: root, stdio: ['ignore', 'pipe', 'ignore'], maxBuffer: 64 * 1024 * 1024,
+    }).toString();
+    return out.split('\0').filter((p) => p && !p.endsWith('/') && isEnvFile(path.posix.basename(p)));
+  } catch {
+    return [];
+  }
+}
+
 export function shouldSkip(rel) {
   const parts = rel.split(/[\\/]/);
   if (parts.some((p) => IGNORED_DIRS.has(p))) return true;
@@ -346,6 +360,17 @@ export function scanProject(root, { exclude = [], staged = false } = {}) {
       continue;
     }
     scanSecrets(rel, content, findings);
+  }
+
+  // В --staged проверяем только коммит, игнорируемые файлы туда не входят
+  if (mode === 'git') {
+    for (const rel of listIgnoredEnvFiles(root)) {
+      if (shouldSkip(rel) || isExcluded(rel)) continue;
+      const content = readText(path.join(root, rel));
+      if (content === null) continue;
+      scanned++;
+      scanEnvFile(rel, content, findings);
+    }
   }
 
   scanSqlFiles(sqlFiles, findings);

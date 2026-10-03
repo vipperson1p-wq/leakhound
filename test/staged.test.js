@@ -88,3 +88,40 @@ describe('--staged', () => {
     assert.throws(() => scanProject(dir, { staged: true }), /git/);
   });
 });
+
+describe('gitignored .env files in git mode', () => {
+  const pub = (name) => ['NEXT_', 'PUBLIC_', name].join('');
+
+  test('public secret in ignored .env.local is reported, file is not flagged as committed', () => {
+    const { dir, write } = repo();
+    write('.env.local', `${pub('OPEN' + 'AI_API_KEY')}=abc123\nOPENAI_API_KEY=${KEY}\n`);
+    const r = scanProject(dir);
+    assert.equal(r.mode, 'git');
+    assert.deepEqual(ids(r), ['public-env-secret']);
+    assert.equal(r.findings[0].file, '.env.local');
+    assert.ok(!JSON.stringify(r).includes(KEY));
+  });
+
+  test('ignored .env in a subfolder is checked, node_modules is not', () => {
+    const { dir, write } = repo();
+    write('.gitignore', 'node_modules\n.env*\n');
+    write('apps/web/.env.local', `${pub('STRIPE_SECRET' + '_KEY')}=abc\n`);
+    write('node_modules/pkg/.env', `${pub('STRIPE_SECRET' + '_KEY')}=abc\n`);
+    assert.deepEqual(scanProject(dir).findings.map((f) => f.file), ['apps/web/.env.local']);
+  });
+
+  test('safe public variables in ignored .env are fine', () => {
+    const { dir, write } = repo();
+    write('.env.local', `${pub('SUPABASE_URL')}=https://x.supabase.co\n${pub('SUPABASE_ANON_KEY')}=xxx\n`);
+    assert.deepEqual(scanProject(dir).findings, []);
+  });
+
+  test('ignored .env files are excluded by .vibescanignore and skipped in --staged', () => {
+    const { dir, write, git } = repo();
+    write('.env.local', `${pub('OPEN' + 'AI_API_KEY')}=abc123\n`);
+    write('a.ts', 'x = 1');
+    git('add', 'a.ts');
+    assert.deepEqual(scanProject(dir, { staged: true }).findings, []);
+    assert.deepEqual(scanProject(dir, { exclude: ['.env.local'] }).findings, []);
+  });
+});
