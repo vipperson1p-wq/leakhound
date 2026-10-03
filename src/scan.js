@@ -23,7 +23,7 @@ const MAX_FILE_SIZE = 1024 * 1024; // 1 MB
 
 // Если это git-репозиторий, берём только файлы, которые в нём есть
 // или попадут туда при следующем `git add .` (не игнорируемые).
-function listFiles(root) {
+export function listFiles(root) {
   try {
     const out = execSync('git ls-files -z --cached --others --exclude-standard', {
       cwd: root, stdio: ['ignore', 'pipe', 'ignore'], maxBuffer: 64 * 1024 * 1024,
@@ -46,7 +46,7 @@ function listFiles(root) {
   }
 }
 
-function shouldSkip(rel) {
+export function shouldSkip(rel) {
   const parts = rel.split(/[\\/]/);
   if (parts.some((p) => IGNORED_DIRS.has(p))) return true;
   const base = parts[parts.length - 1];
@@ -55,7 +55,7 @@ function shouldSkip(rel) {
   return false;
 }
 
-function readText(abs) {
+export function readText(abs) {
   try {
     const stat = fs.statSync(abs);
     if (stat.size > MAX_FILE_SIZE) return null;
@@ -69,7 +69,7 @@ function readText(abs) {
 
 // ---------- Вспомогательные функции ----------
 
-const isEnvFile = (base) => /^\.env(\..+)?$/.test(base) && !/\.(example|sample|template)$/.test(base);
+export const isEnvFile = (base) => /^\.env(\..+)?$/.test(base) && !/\.(example|sample|template)$/.test(base);
 
 // Грубая эвристика: попадает ли этот файл в браузер
 function isClientFile(rel, content) {
@@ -83,7 +83,7 @@ function isClientFile(rel, content) {
 
 const lineOf = (content, index) => content.slice(0, index).split('\n').length;
 
-const mask = (secret) => `${secret.slice(0, 6)}…****`;
+export const mask = (secret) => `${secret.slice(0, 6)}…****`;
 
 function snippet(content, index, secret) {
   const start = content.lastIndexOf('\n', index) + 1;
@@ -95,7 +95,7 @@ function snippet(content, index, secret) {
   return line.length > 160 ? line.slice(0, 157) + '...' : line;
 }
 
-function decodeJwtPayload(token) {
+export function decodeJwtPayload(token) {
   try {
     const payload = token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/');
     return JSON.parse(Buffer.from(payload, 'base64').toString('utf8'));
@@ -104,7 +104,7 @@ function decodeJwtPayload(token) {
   }
 }
 
-function makeFinding(rule, file, line, extra = {}) {
+export function makeFinding(rule, file, line, extra = {}) {
   return {
     ruleId: rule.id,
     title: rule.title,
@@ -114,7 +114,8 @@ function makeFinding(rule, file, line, extra = {}) {
     snippet: extra.snippet || null,
     clientSide: extra.clientSide ?? null,
     why: extra.why || rule.why,
-    fix: rule.fix,
+    fix: extra.fix || rule.fix,
+    ...(extra.commit && { commit: extra.commit }),
   };
 }
 

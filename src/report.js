@@ -26,6 +26,7 @@ export function printReport(result) {
     const loc = f.line ? `${f.file}:${f.line}` : f.file;
     console.log(`${C.bold}${i + 1}.${C.reset} [${LABEL[f.severity]}] ${C.bold}${f.title}${C.reset}`);
     console.log(`   ${C.dim}📄 ${loc}${f.clientSide ? '  ⚠️  похоже на клиентский файл — виден в браузере' : ''}${C.reset}`);
+    if (f.commit) console.log(`   ${C.dim}🕓 коммит ${f.commit.short} от ${f.commit.date} — «${f.commit.subject}»${C.reset}`);
     if (f.snippet) console.log(`   ${C.dim}│${C.reset} ${f.snippet}`);
     console.log(`   ${C.bold}Почему опасно:${C.reset} ${f.why}`);
     console.log(`   ${C.bold}Как исправить:${C.reset} ${f.fix.split('\n').join('\n   ')}\n`);

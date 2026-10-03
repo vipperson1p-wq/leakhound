@@ -10,6 +10,7 @@
     node src/index.js /путь/к/проекту --json    # вывод для AI-слоя и сайта
     node src/index.js . --exclude fixtures/     # пропустить папку (флаг можно повторять)
     node src/index.js --staged                   # только файлы из git add (то, что уйдёт в коммит)
+    node src/index.js . --history                # плюс ключи, удалённые из файлов, но оставшиеся в истории git
     node src/index.js install-hook               # pre-commit хук: блокирует коммит при критичных проблемах
     npm test                                     # юнит-тесты (node:test)
     npm run scan:fixture                         # прогон на тестовом «дырявом» проекте
@@ -29,6 +30,7 @@
     src/scan.js    — движок: собирает файлы и применяет правила
     src/report.js  — вывод в терминал
     src/ignore.js  — исключения (--exclude, .vibescanignore)
+    src/detectors/ — отдельные детекторы (history.js — история git)
     src/index.js   — точка входа
     test/          — тесты на node:test
 
