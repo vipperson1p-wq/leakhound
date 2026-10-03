@@ -263,7 +263,7 @@ export default {
     installedBy: 'Установлен командой: leakhound install-hook',
     notFound: 'leakhound: сканер не найден — проверка пропущена.',
     install: 'Установи его в проект: npm install -D {package}',
-    blocked: '⛔ Коммит заблокирован: leakhound нашёл критичные проблемы (см. выше).',
+    blocked: '⛔ Коммит заблокирован: leakhound нашёл проблемы уровня КРИТИЧНО или ВЫСОКИЙ (см. выше).',
     blockedFix1: '   Исправь их и снова сделай git add. Если это ложное срабатывание —',
     blockedFix2: '   добавь путь в .leakhoundignore.',
     npmError1: '   (Если выше ошибка npm, а не находки — проверь интернет или установи пакет:',
