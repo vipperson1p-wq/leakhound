@@ -42,6 +42,12 @@
 3. [ ] Публикация в npm: пакет и команда — `leakhound`. Публикует владелец сам; push новой версии в npm — только после его подтверждения.
    - **Переименование 2026-10-03:** Vibe Scanner / `vibecode-scanner` → **LeakHound / `leakhound`** (с 0.1.0). `vibecode-scanner` (0.1.0, 0.1.1) — пометить deprecated после публикации `leakhound`. Имя `vibe-scanner` в npm — **чужой пакет**: никогда не писать `npx vibe-scanner`; `test/package-name.test.js` ловит запуск обоих старых имён.
    - Совместимость со старым именем: хук с маркером `# vibe-scanner pre-commit hook` заменяется без `--force`; `install-skill` удаляет наш старый skill (`vibe-scanner/`, `vibe-scanner.mdc` с нашим маркером); `.vibescanignore` читается вместе с `.leakhoundignore`. `VIBESCAN_LANG` → `LEAKHOUND_LANG` без совместимости.
+   - [ ] **Релизы только из CI: GitHub Actions + npm trusted publishing (OIDC, без токенов).** Сейчас публикует владелец вручную с ноутбука (`npm publish` + подтверждение в браузере). Цель — чтобы новая версия попадала в npm только из CI, с provenance.
+     - Workflow `.github/workflows/release.yml`: запуск по тегу `v*` (или GitHub Release), `permissions: id-token: write, contents: read`, `npm test` + самопроверка + проверка, что версия в `package.json` совпадает с тегом, затем `npm publish --access public`. Без `NPM_TOKEN` в секретах.
+     - На npmjs.com в настройках пакета `leakhound` добавить Trusted Publisher: GitHub Actions, `vipperson1p-wq/leakhound`, имя файла workflow. Делает владелец (вход в npm).
+     - После первой успешной публикации из CI — в настройках пакета запретить публикацию токенами (оставить только trusted publishing + 2FA).
+     - Перед работой сверить требования с документацией (docs.npmjs.com → Trusted publishing): минимальная версия npm CLI в раннере, поддерживаемые раннеры, provenance. Не угадывать.
+     - Push тега = релиз, поэтому тег ставить только с подтверждения владельца.
 4. [x] MCP + skill — одной задачей (в коде; в npm попадёт со следующей публикацией).
 5. [x] Простой лендинг: `site/` (статика без сборки, главная + `/install`), развёрнут 2026-10-03 на **https://leakhound-sable.vercel.app** (имя `leakhound.vercel.app` занято).
    - Vercel: команда `vipperson1p-5650s-projects` (Hobby), проект `leakhound` (`prj_Plh63ZkqsgFBugKmnG07kbReIkR3`), root `site`, без фреймворка. **Не привязан к GitHub** — деплой вручную загрузкой файлов из закоммиченного `site/` (target production), чтобы push в `main` не выкатывал продакшен без подтверждения владельца. После деплоя сверять sha1 каждого файла с коммитом.
