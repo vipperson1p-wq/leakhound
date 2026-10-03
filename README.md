@@ -1,49 +1,110 @@
-# 🔍 Vibe Scanner (v0.1)
+# 🔍 Vibe Scanner
 
-Сканер безопасности для вайбкод-проектов. Ищет утёкшие ключи, открытые .env и таблицы Supabase без RLS.
+**English** · [Русский](README.ru.md)
 
-## Запуск
+A security scanner for "vibe-coded" projects — apps built with AI help on
+**Next.js / Vite + Supabase + Vercel**. It catches the mistakes AI assistants
+make most often, **before you deploy**:
 
-Нужен только Node.js 18+, зависимостей нет.
+- API keys hardcoded in code (OpenAI, Anthropic, Stripe, AWS, GitHub, Google, Supabase…)
+- secrets in public env variables (`NEXT_PUBLIC_`, `VITE_`…) that end up in the browser
+- `.env` files committed to git — including ones deleted later but still in history
+- Supabase tables without Row Level Security and `USING (true)` policies
 
-    node src/index.js /путь/к/твоему/проекту
-    node src/index.js /путь/к/проекту --json    # вывод для AI-слоя и сайта
-    node src/index.js . --exclude fixtures/     # пропустить папку (флаг можно повторять)
-    node src/index.js --staged                   # только файлы из git add (то, что уйдёт в коммит)
-    node src/index.js . --history                # плюс ключи, удалённые из файлов, но оставшиеся в истории git
-    node src/index.js install-hook               # pre-commit хук: блокирует коммит при критичных проблемах
-    npm test                                     # юнит-тесты (node:test)
-    npm run scan:fixture                         # прогон на тестовом «дырявом» проекте
-    npm run scan:self                            # самопроверка сканером
+Every finding comes with a plain-language explanation and a concrete fix.
+Keys are **always masked** in the output (`sk-pro…****`).
 
-## Что проверяется
+> ⚠️ Reports are currently in **Russian**. English output is planned.
 
-- Ключи: OpenAI, Anthropic, Stripe, AWS, GitHub, Google, Supabase (service_role и sb_secret_), приватные PEM-ключи
-- Секреты в публичных переменных (NEXT_PUBLIC_, VITE_, REACT_APP_, EXPO_PUBLIC_)
-- Файлы .env, которые попадут в git, и .gitignore без защиты .env
-- SQL-миграции: таблицы без RLS и политики USING (true)
-- Подозрительные захардкоженные пароли (низкий приоритет, возможны ложные срабатывания)
+## Quick start
 
-## Структура
+Requires Node.js 18+. No dependencies.
 
-    src/rules.js   — все правила (добавляй новые сюда)
-    src/scan.js    — движок: собирает файлы и применяет правила
-    src/report.js  — вывод в терминал
-    src/ignore.js  — исключения (--exclude, .vibescanignore)
-    src/detectors/ — отдельные детекторы (history.js — история git)
-    src/index.js   — точка входа
-    test/          — тесты на node:test
+```bash
+git clone https://github.com/vipperson1p-wq/vibe-scanner.git
+cd vibe-scanner
+node src/index.js /path/to/your/project
+```
 
-## Исключения
+> Not published to npm yet — run it from source for now.
 
-Файл `.vibescanignore` в корне проекта (синтаксис — упрощённый `.gitignore`):
+## Usage
 
-    # комментарий
-    test-project/      # папка на любой глубине
-    /docs              # путь от корня проекта
-    *.min.js           # шаблоны: * и **
+```bash
+node src/index.js <path>                     # scan a project
+node src/index.js <path> --json              # machine-readable output
+node src/index.js <path> --history           # also scan git history for removed keys
+node src/index.js <path> --exclude fixtures/ # skip paths (repeatable)
+node src/index.js --staged                   # only files staged for commit
+node src/index.js install-hook [path]        # pre-commit hook: block commits with critical/high findings
+```
 
-То же можно передать флагом `--exclude <шаблон>`.
+Exit code: `1` if there are critical or high findings, `0` otherwise, `2` on usage errors —
+so it works in CI as is.
 
-Если папка — git-репозиторий, проверяются только файлы, которые есть или попадут в репозиторий.
-Ключи в отчёте всегда маскируются.
+## What it checks
+
+| Check | Severity |
+|---|---|
+| Known secret key formats (OpenAI, Anthropic, Stripe live, AWS, GitHub, Supabase `sb_secret_` / `service_role` JWT, PEM private keys) | critical |
+| Secrets in public env variables (`NEXT_PUBLIC_`, `VITE_`, `REACT_APP_`, `EXPO_PUBLIC_`) | high |
+| `.env` files that are (or will be) committed to git | critical |
+| `.env` files that were committed and later deleted (`--history`) | high |
+| Keys removed from files but still in git history (`--history`) | critical |
+| SQL migrations: table created without RLS | critical |
+| SQL migrations: `USING (true)` / `WITH CHECK (true)` policies | high / low (read-only) |
+| SQL migrations: table altered but created elsewhere — RLS can't be verified | medium |
+| `.gitignore` doesn't protect `.env` | medium |
+| Google API keys (often public by design, but should be restricted) | medium |
+| Possible hardcoded passwords, Stripe test keys | low |
+
+The Supabase `anon` key is public by design and is **not** reported.
+
+In a git repository, the scanner checks files that are in the repo or would be
+added by `git add .`, plus gitignored `.env*` files (for public variables only).
+
+## What it does NOT check
+
+"No problems found" does not mean "the project is secure". The scanner does not see:
+
+- your live database (changes made in the Supabase dashboard) — use Supabase Security Advisor;
+- access-control logic in your code (can user A read user B's data through your API?);
+- vulnerable dependencies — use `npm audit`;
+- the built bundle (`.next`, `dist`) and hosting settings (Vercel env vars, CORS, headers);
+- XSS, SQL injection, prompt injection.
+
+## Exclusions
+
+Create `.vibescanignore` in the project root (simplified `.gitignore` syntax):
+
+```
+# comment
+test-project/      # directory at any depth
+/docs              # path from the project root
+*.min.js           # globs: * and **
+```
+
+Or pass `--exclude <pattern>`.
+
+## Principles
+
+- **Detection is deterministic** — regexes and parsing, no AI deciding what is a vulnerability.
+- **Secrets never leave your machine** and are masked in every output.
+- **Only your own projects** — a local folder or a repo you have access to.
+
+## Contributing
+
+New rules, false-positive reports and fixes are welcome — see [CONTRIBUTING.md](CONTRIBUTING.md).
+Found a vulnerability in the scanner itself? Please report it privately — see [SECURITY.md](SECURITY.md).
+
+## Support the project
+
+Vibe Scanner is free and open source, with no subscriptions. If it saved you
+from leaking a key, you can support development:
+
+<!-- TODO: donation link -->
+*Donation link coming soon.*
+
+## License
+
+[MIT](LICENSE)
