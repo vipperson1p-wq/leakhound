@@ -1,5 +1,3 @@
 # Намеренно уязвимая фикстура с фейковыми ключами
 test-project/
 
-# Landing page: its example report quotes a public env variable name on purpose
-site/index.html

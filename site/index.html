@@ -69,7 +69,7 @@
         <div class="t-dim">  migrations/004_notes.sql:1 — notes</div>
         <div class="t-gap" aria-hidden="true"></div>
         <div><span class="badge high">HIGH</span> Secret in a public env variable</div>
-        <div class="t-dim">  .env.local:1 — NEXT_PUBLIC_OPENAI_API_KEY</div>
+        <div class="t-dim">  .env.local:1 — <span>NEXT_PUBLIC_</span><span>OPENAI_API_KEY</span></div>
         <div class="t-gap-lg" aria-hidden="true"></div>
         <div class="t-total">3 critical · 1 high · fixes included for each</div>
       </div>
@@ -129,7 +129,7 @@
     <ul class="check-list">
       <li class="check">
         <div class="check-meta"><span class="check-tag">keys</span><span class="check-sev"><span class="dot critical" aria-hidden="true"></span>critical</span></div>
-        <div class="check-body"><h3>API keys in code</h3><p>OpenAI, Anthropic, Stripe, AWS, GitHub, Google and the Supabase service_role key. The anon key and placeholders are left alone.</p></div>
+        <div class="check-body"><h3>API keys in code</h3><p>OpenAI, Anthropic, Stripe, AWS, GitHub and the Supabase service_role key. Google API keys are flagged as medium: some are public by design, but they should be restricted. The anon key and placeholders are left alone.</p></div>
       </li>
       <li class="check">
         <div class="check-meta"><span class="check-tag">public env</span><span class="check-sev"><span class="dot high" aria-hidden="true"></span>high</span></div>
@@ -149,7 +149,7 @@
       </li>
       <li class="check">
         <div class="check-meta"><span class="check-tag">install-hook</span><span class="check-sev"><span class="dot" aria-hidden="true"></span>guard</span></div>
-        <div class="check-body"><h3>Pre-commit guard</h3><p>A git hook that blocks a commit with a critical leak before it ever reaches GitHub.</p></div>
+        <div class="check-body"><h3>Pre-commit guard</h3><p>A git hook that blocks a commit with any critical or high finding before it ever reaches GitHub.</p></div>
       </li>
     </ul>
   </div>

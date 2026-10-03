@@ -131,12 +131,12 @@
         <li class="slash"><code>/leakhound history</code><span>Also search old commits for keys you deleted from files.</span><button type="button" class="copy-btn" data-copy="/leakhound history" aria-label="Copy /leakhound history">Copy</button></li>
         <li class="slash"><code>/leakhound staged</code><span>Check only what goes into your next commit.</span><button type="button" class="copy-btn" data-copy="/leakhound staged" aria-label="Copy /leakhound staged">Copy</button></li>
         <li class="slash"><code>/leakhound hook</code><span>Install the pre-commit hook. Asks you first.</span><button type="button" class="copy-btn" data-copy="/leakhound hook" aria-label="Copy /leakhound hook">Copy</button></li>
-        <li class="slash"><code>/leakhound fix</code><span>Fix critical findings one by one, then list the keys to rotate.</span><button type="button" class="copy-btn" data-copy="/leakhound fix" aria-label="Copy /leakhound fix">Copy</button></li>
+        <li class="slash"><code>/leakhound fix</code><span>Fix critical findings one by one. No critical ones? Turn on RLS for tables it couldn’t verify. Ends with the list of keys to rotate.</span><button type="button" class="copy-btn" data-copy="/leakhound fix" aria-label="Copy /leakhound fix">Copy</button></li>
       </ul>
       <div class="fallback">
         <div class="fallback-text">
-          <span class="label">No slash commands, e.g. Claude Desktop? Paste this instead:</span>
-          <span class="prompt-text" id="fallback-prompt">Scan this project with LeakHound and explain what you find in plain words.</span>
+          <span class="label">No slash commands, e.g. Claude Desktop? Paste this instead, with your project folder:</span>
+          <span class="prompt-text" id="fallback-prompt">Scan the project in &lt;path to your project&gt; with LeakHound and explain what you find in plain words.</span>
         </div>
         <button type="button" class="copy-btn is-ghost" data-copy-target="fallback-prompt" aria-label="Copy prompt">Copy</button>
       </div>
@@ -158,21 +158,40 @@
         <span class="prompt" aria-hidden="true">$</span><span class="cmd-text">npx leakhound install-hook</span>
         <button type="button" class="copy-btn is-accent" data-copy="npx leakhound install-hook" aria-label="Copy npx leakhound install-hook">Copy</button>
       </div>
-      <div class="hook-demo" role="img" aria-label="Example: git commit is blocked because an OpenAI key is in the code">
-        <div><span class="t-dim">$</span> git commit -m "add chat"</div>
-        <div><span class="badge critical">CRITICAL</span> OpenAI key in code — app/api/chat/route.ts:4</div>
-        <div class="t-dim">Commit blocked. Move the key to .env and try again.</div>
-      </div>
+      <figure class="hook-figure">
+        <div class="hook-demo">
+          <div><span class="t-dim">$</span> git commit -m "add chat"</div>
+          <div class="t-gap" aria-hidden="true"></div>
+          <div><span class="t-bold">🔍 leakhound</span>  <span class="t-dim">~/projects/my-app</span></div>
+          <div class="t-dim">Mode: commit files only (--staged) · files scanned: 1</div>
+          <div class="t-gap" aria-hidden="true"></div>
+          <div><span class="t-bold">1.</span> [<span class="t-crit">CRITICAL</span>] <span class="t-bold">OpenAI API key in code</span></div>
+          <div class="t-dim">   📄 app/api/chat/route.ts:4</div>
+          <div>   <span class="t-dim">│</span> const openai = new OpenAI({ <span>apiKey</span>: "sk-pro…****" });</div>
+          <div>   <span class="t-bold">Why it is dangerous:</span> Anyone with this key can spend your money on the OpenAI API.</div>
+          <div>   <span class="t-bold">How to fix:</span> Revoke the key at platform.openai.com, create a new one and use it only on the server via process.env.</div>
+          <div class="t-gap" aria-hidden="true"></div>
+          <div>Total: 1 critical · 0 high · 0 medium · 0 low</div>
+          <div>ℹ️  Only files from the upcoming commit were checked: 1.</div>
+          <div class="t-gap" aria-hidden="true"></div>
+          <div>⛔ Commit blocked: leakhound found critical or high problems (see above).</div>
+          <div>   Fix them and git add again. If it is a false positive,</div>
+          <div>   add the path to .leakhoundignore.</div>
+          <div>   (If there is an npm error above rather than findings, check your connection or install the package:</div>
+          <div>   npm install -D leakhound)</div>
+        </div>
+        <figcaption class="caption">What the hook prints when a commit is blocked. The key is masked.</figcaption>
+      </figure>
     </div>
   </div>
 </section>
 
-<!-- Step 4 -->
-<section class="wrap install-step" aria-labelledby="step4-title">
-  <div class="step-grid">
+<!-- After installing: not a step -->
+<section class="section-border after-install" aria-labelledby="help-title">
+  <div class="wrap step-grid">
     <div class="step-side">
-      <div class="step-n">Step 4</div>
-      <h2 id="step4-title">Help the hound get better</h2>
+      <div class="step-n">After installing</div>
+      <h2 id="help-title">Help the hound get better</h2>
       <p>LeakHound is free and built in the open. Feedback from real projects is what improves it.</p>
     </div>
     <div class="step-main">
