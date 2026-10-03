@@ -138,3 +138,10 @@ describe('security headers (site/vercel.json)', () => {
     });
   }
 });
+
+test('no placeholder links or texts on the site', () => {
+  for (const page of PAGES) {
+    assert.doesNotMatch(html[page], /href="#"/, `${page}: link to nowhere`);
+    assert.doesNotMatch(text(html[page]), /\[[A-Z ]*LINK\]/, `${page}: placeholder text like [DONATION LINK]`);
+  }
+});

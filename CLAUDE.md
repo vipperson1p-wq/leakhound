@@ -54,7 +54,7 @@
    - Защита: Vercel Authentication только для preview; продакшен на *.vercel.app публичный.
    - Заголовки — в `site/vercel.json` (CSP только self + Google Fonts, frame-ancestors 'none', nosniff, Referrer-Policy и др.), тест в `test/site.test.js`. Ничего инлайнового в HTML (скрипты, style=, on*=) — сломает CSP, тест ловит.
    - [ ] Свой домен — отдельно, по решению владельца. HSTS без includeSubDomains — специально, чтобы не задеть поддомены будущего домена.
-   - [ ] Ссылка на донаты на сайте — заглушка `[DONATION LINK]` (как в README).
+   - [ ] **Донаты на сайте:** пункт «Support the project» убран (2026-10-03), пока нет настоящей ссылки. Вернуть вместе со ссылкой в двух местах: подвал главной (`site/index.html`, рядом с GitHub / npm) и блок «Help the hound get better» на `/install` (третий пункт списка, после «Report a false positive…»). Заодно — заменить `<!-- TODO: donation link -->` в `README.md` и `README.ru.md`.
 6. [ ] Пост в сообществах.
 7. [ ] Профессиональные правила — после отзывов пользователей.
 
