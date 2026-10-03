@@ -155,6 +155,7 @@ describe('masking', () => {
 
 describe('SQL / RLS', () => {
   const sql = (...files) => scanSqlFiles(files.map((content, i) => ({ rel: `m${i}.sql`, content })));
+  const T = 'create table t (id int); alter table t enable row level security;';
 
   test('table without RLS is detected', () => {
     assert.deepEqual(ids(sql('create table public.todos (id int);')), ['rls-not-enabled']);
@@ -179,16 +180,16 @@ describe('SQL / RLS', () => {
   });
 
   test('USING (true) for select only is low', () => {
-    const found = sql('create policy "p" on t for select using ( true );');
+    const found = sql(T, 'create policy "p" on t for select using ( true );');
     assert.equal(found[0].severity, 'low');
   });
 
   test('WITH CHECK (true) is detected', () => {
-    assert.deepEqual(ids(sql('create policy "p" on t for insert with check (true);')), ['permissive-policy']);
+    assert.deepEqual(ids(sql(T, 'create policy "p" on t for insert with check (true);')), ['permissive-policy']);
   });
 
   test('policy with auth.uid() is NOT reported', () => {
-    assert.deepEqual(sql('create policy "own" on t using (auth.uid() = user_id);'), []);
+    assert.deepEqual(sql(T, 'create policy "own" on t using (auth.uid() = user_id);'), []);
   });
 });
 
@@ -289,5 +290,55 @@ describe('report metadata', () => {
     const r = scanProject('test-project');
     assert.ok(Array.isArray(r.notChecked) && r.notChecked.length >= 5);
     assert.ok(r.notChecked.some((x) => /git/i.test(x.what)));
+  });
+});
+
+describe('SQL / tables created outside migrations', () => {
+  const sql = (...files) => scanSqlFiles(files.map((content, i) => ({ rel: `m${i}.sql`, content })));
+
+  test('altered but never created table is reported as unverified', () => {
+    const found = sql('alter table public.reports add column title text;');
+    assert.deepEqual(ids(found), ['rls-unverified']);
+    assert.equal(found[0].severity, 'medium');
+    assert.match(found[0].why, /reports/);
+  });
+
+  test('policy / grant / index / trigger references are detected', () => {
+    for (const stmt of [
+      'create policy "own" on public.profiles for select using (auth.uid() = id);',
+      'grant select (id, title) on public.profiles to anon;',
+      'grant select on table profiles to authenticated;',
+      'create unique index profiles_idx on public.profiles (id);',
+      'create trigger t after insert on public.profiles for each row execute function f();',
+    ]) {
+      assert.deepEqual(ids(sql(stmt)), ['rls-unverified'], stmt);
+    }
+  });
+
+  test('table with RLS enabled in migrations is verified', () => {
+    assert.deepEqual(sql('alter table public.reports add column x int;', 'alter table reports enable row level security;'), []);
+  });
+
+  test('table created in a later migration is not unverified', () => {
+    assert.deepEqual(ids(sql('create policy "p" on todos using (auth.uid() = user_id);', 'create table todos (id int);')), ['rls-not-enabled']);
+  });
+
+  test('non-public schemas and non-table grants are ignored', () => {
+    assert.deepEqual(sql(
+      'create policy "own files" on storage.objects for select using (auth.uid() = owner);',
+      'create trigger on_signup after insert on auth.users for each row execute function public.handle_new_user();',
+      'grant execute on function public.f(uuid) to anon;',
+      'grant usage on schema public to anon;',
+    ), []);
+  });
+
+  test('one finding per table, pointing at the earliest migration', () => {
+    const found = scanSqlFiles([
+      { rel: '002_b.sql', content: 'alter table reports add column b int;' },
+      { rel: '001_a.sql', content: '-- a\nalter table reports add column a int;' },
+    ]);
+    assert.equal(found.length, 1);
+    assert.equal(found[0].file, '001_a.sql');
+    assert.equal(found[0].line, 2);
   });
 });

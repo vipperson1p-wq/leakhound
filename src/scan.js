@@ -3,7 +3,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import {
   secretRules, jwtRegex, serviceRoleRule, publicEnvRule, genericSecretRule,
-  envFileRule, gitignoreRule, rlsMissingRule, permissivePolicyRule, SEVERITY_ORDER, KNOWN_EXAMPLE_KEYS,
+  envFileRule, gitignoreRule, rlsMissingRule, rlsUnverifiedRule, permissivePolicyRule, SEVERITY_ORDER, KNOWN_EXAMPLE_KEYS,
   NOT_CHECKED,
 } from './rules.js';
 import { IGNORE_FILE, parseIgnoreFile, compileIgnore } from './ignore.js';
@@ -201,9 +201,38 @@ export function scanEnvFile(rel, content, findings = []) {
 // в одной миграции, а RLS включён в другой.
 const normTable = (name) => name.replace(/"/g, '').toLowerCase().replace(/^public\./, '');
 
+// Statements that use an existing table: alter / policy / grant / index / trigger
+const TABLE_NAME = '((?:"?\\w+"?\\.)?"?\\w+"?)';
+const TABLE_REF_RES = [
+  new RegExp(`alter\\s+table\\s+(?:only\\s+)?(?:if\\s+exists\\s+)?(?:only\\s+)?${TABLE_NAME}`, 'gi'),
+  new RegExp(`create\\s+policy\\s+(?:"[^"]+"|\\w+)\\s+on\\s+${TABLE_NAME}`, 'gi'),
+  new RegExp(`grant\\s+[^;]*?\\s+on\\s+(?:table\\s+)?${TABLE_NAME}\\s+to\\b`, 'gi'),
+  new RegExp(`create\\s+(?:unique\\s+)?index\\s+[^;]*?\\s+on\\s+(?:only\\s+)?${TABLE_NAME}`, 'gi'),
+  new RegExp(`create\\s+(?:or\\s+replace\\s+)?(?:constraint\\s+)?trigger\\s+[^;]*?\\s+on\\s+${TABLE_NAME}`, 'gi'),
+];
+const NOT_TABLES = new Set(['function', 'schema', 'sequence', 'all', 'table', 'only']);
+const inPublic = (name) => {
+  const raw = name.replace(/"/g, '').toLowerCase();
+  return !raw.includes('.') || raw.startsWith('public.');
+};
+
 export function scanSqlFiles(sqlFiles, findings = []) {
   const created = []; // { table, file, line }
+  const createdSet = new Set();
+  const referenced = new Map(); // table → first { file, line }
   const rlsEnabled = new Set();
+
+  // По имени файла: миграции обычно начинаются с даты, так первое упоминание — самое раннее
+  const ordered = [...sqlFiles].sort((a, b) => a.rel.localeCompare(b.rel));
+  for (const { rel, content } of ordered) {
+    for (const re of TABLE_REF_RES) {
+      for (const m of content.matchAll(re)) {
+        const table = normTable(m[1]);
+        if (!inPublic(m[1]) || NOT_TABLES.has(table) || referenced.has(table)) continue;
+        referenced.set(table, { file: rel, line: lineOf(content, m.index) });
+      }
+    }
+  }
 
   for (const { rel, content } of sqlFiles) {
     const createRe = /create\s+table\s+(?:if\s+not\s+exists\s+)?((?:"?\w+"?\.)?"?\w+"?)/gi;
@@ -211,6 +240,7 @@ export function scanSqlFiles(sqlFiles, findings = []) {
       const raw = m[1].replace(/"/g, '').toLowerCase();
       if (raw.includes('.') && !raw.startsWith('public.')) continue; // auth., private. и т.п.
       created.push({ table: normTable(m[1]), file: rel, line: lineOf(content, m.index) });
+      createdSet.add(normTable(m[1]));
     }
 
     const rlsRe = /alter\s+table\s+(?:only\s+)?(?:if\s+exists\s+)?((?:"?\w+"?\.)?"?\w+"?)\s+enable\s+row\s+level\s+security/gi;
@@ -236,6 +266,16 @@ export function scanSqlFiles(sqlFiles, findings = []) {
         snippet: `CREATE TABLE ${t.table} … (RLS нигде не включён)`,
       }));
     }
+  }
+
+  // Таблица используется в миграциях, но создана где-то ещё (обычно в панели Supabase).
+  // Включён ли на ней RLS — по коду не узнать, и молчать об этом нельзя.
+  for (const [table, ref] of referenced) {
+    if (createdSet.has(table) || rlsEnabled.has(table)) continue;
+    findings.push(makeFinding(rlsUnverifiedRule, ref.file, ref.line, {
+      snippet: `${table} — нет CREATE TABLE и ENABLE ROW LEVEL SECURITY в миграциях`,
+      why: rlsUnverifiedRule.why.replace('<table>', table),
+    }));
   }
   return findings;
 }

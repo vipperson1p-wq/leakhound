@@ -145,6 +145,14 @@ export const rlsMissingRule = {
   fix: 'Добавь в миграцию: ALTER TABLE <таблица> ENABLE ROW LEVEL SECURITY; и создай политики, которые разрешают доступ только нужным пользователям.',
 };
 
+export const rlsUnverifiedRule = {
+  id: 'rls-unverified',
+  title: 'RLS не проверен: таблица создана вне миграций',
+  severity: 'medium',
+  why: 'Миграции работают с таблицей <table>, но не создают её и не включают на ней RLS. Скорее всего, таблицу создали в панели Supabase. Сканер не может узнать, включён ли на ней RLS: если нет — любой с anon-ключом читает и меняет все строки.',
+  fix: 'Проверь таблицу в Supabase → Table Editor (значок RLS) или в Security Advisor. Надёжнее всего — добавить в миграцию ALTER TABLE <таблица> ENABLE ROW LEVEL SECURITY; (повторное включение безопасно): тогда это видно в коде и сканер перестанет предупреждать.',
+};
+
 export const permissivePolicyRule = {
   id: 'permissive-policy',
   title: 'Политика RLS разрешает всё (USING true)',
