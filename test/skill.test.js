@@ -19,15 +19,6 @@ const frontmatter = /^---\n([\s\S]*?)\n---\n/.exec(skill)[1];
 const SUBCOMMANDS = ['history', 'staged', 'hook', 'fix'];
 const MCP_TOOLS = ['scan_project', 'scan_staged', 'scan_history'];
 
-// A YAML field as a list: `key: a b` / `key: a, b` / `key:\n  - a\n  - b`
-function yamlList(key) {
-  const m = new RegExp(`^${key}:(.*)\\n((?:[ \\t]+-.*\\n?)*)`, 'm').exec(`${frontmatter}\n`);
-  if (!m) return null;
-  const inline = m[1].trim().split(/[\s,]+/).filter(Boolean);
-  const items = [...m[2].matchAll(/^[ \t]+-\s*(.+)$/gm)].map((x) => x[1].trim().replace(/^["']|["']$/g, ''));
-  return [...inline, ...items];
-}
-
 describe('SKILL.md', () => {
   test('has Agent Skills frontmatter with name and a trigger description', () => {
     assert.match(frontmatter, /^name: leakhound$/m);
@@ -41,11 +32,10 @@ describe('SKILL.md', () => {
     assert.doesNotMatch(frontmatter, /^user-invocable:\s*false/m);
   });
 
-  test('allowed-tools pre-approves exactly the three read-only MCP scan tools and nothing else', () => {
-    // A Bash(npx leakhound *) prefix would also let through install-hook and any version from npm
-    assert.deepEqual(yamlList('allowed-tools').sort(), MCP_TOOLS.map((t) => `mcp__leakhound__${t}`).sort());
-    assert.equal(frontmatter.match(/^allowed-tools:/gm).length, 1);
-    assert.doesNotMatch(frontmatter, /^allowed_tools:|^allowedTools:/m);
+  test('pre-approves nothing: every scan asks the user for permission', () => {
+    // allowed-tools (any spelling) would let tools run without a prompt while the skill is active
+    for (const rel of files) assert.doesNotMatch(read(rel), /allowed[-_ ]?tools/i, rel);
+    assert.doesNotMatch(all, /pre-approved/i);
   });
 
   test('argument-hint, the command table and the reference files agree', () => {

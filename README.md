@@ -147,10 +147,7 @@ to ask yourself:
 | `/leakhound hook` | Install the pre-commit hook — asks you first |
 | `/leakhound fix` | Fix critical findings one by one, asking before every change; ends with the list of keys you need to rotate. No critical ones → turns on RLS for tables the scanner couldn't verify, in a new migration, after asking |
 
-The scans run without permission prompts only through the MCP server: the skill pre-approves
-just its three read-only tools (`mcp__leakhound__scan_project`, `…scan_staged`, `…scan_history`),
-which works when the server is added under the name `leakhound`. Everything else — CLI commands,
-installing the hook, editing files — asks you as usual.
+Every scan asks for your permission, like any other tool call.
 
 ## What it checks
 

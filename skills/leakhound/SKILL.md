@@ -2,10 +2,6 @@
 name: leakhound
 description: Security check for Next.js / Vite + Supabase projects with leakhound. Use before every git commit, after adding or changing API keys, tokens, .env files or environment variables, after writing SQL migrations or Supabase RLS policies, before making a repository public or deploying, and when the user asks whether their project is secure. Explains findings in plain language and fixes them.
 argument-hint: "[history | staged | hook | fix]"
-allowed-tools:
-  - mcp__leakhound__scan_project
-  - mcp__leakhound__scan_staged
-  - mcp__leakhound__scan_history
 ---
 
 <!-- leakhound skill (installed by: leakhound install-skill) -->
@@ -49,8 +45,8 @@ by the moment, as below.
 ## How to run
 
 Prefer the MCP tools `scan_project`, `scan_staged`, `scan_history` (server `leakhound`)
-when they are available — they only read and are pre-approved by this skill.
-Otherwise use the CLI from the project root (the user approves each command):
+when they are available — they only read. Otherwise use the CLI from the project root.
+Either way the user approves each run.
 
 ```bash
 npx leakhound . --json --lang en          # whole project
