@@ -4,6 +4,7 @@ import { execFileSync } from 'node:child_process';
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { createT, ScanError, DEFAULT_LANG } from './i18n/index.js';
 
 export const HOOK_MARKER = '# vibe-scanner pre-commit hook';
 export const PACKAGE_NAME = 'vibecode-scanner';
@@ -20,35 +21,49 @@ const isInstalledPackage = (cliPath) => /[\\/]node_modules[\\/]/.test(cliPath);
 //   2. исходники, если хук ставили из клона репозитория;
 //   3. npx с закреплённой версией — не тянем новую непроверенную версию на каждый коммит.
 // Если ничего не доступно — предупреждаем и пропускаем коммит, а не ломаем все коммиты.
-function hookScript({ cliPath, source }) {
+// Hook texts go inside double-quoted echo — characters the shell would interpret are not allowed
+const SHELL_UNSAFE = /["$`\\]/;
+export function hookMessages(lang) {
+  const t = createT(lang);
+  const keys = ['installedBy', 'notFound', 'install', 'blocked', 'blockedFix1', 'blockedFix2', 'npmError1', 'npmError2'];
+  const m = Object.fromEntries(keys.map((k) => [k, t(`hook.${k}`, { package: PACKAGE_NAME })]));
+  for (const [k, v] of Object.entries(m)) {
+    if (SHELL_UNSAFE.test(v)) throw new Error(`hook.${k} (${lang}) contains a shell-unsafe character`);
+  }
+  return m;
+}
+
+function hookScript({ cliPath, source, lang }) {
   const sourcePath = source ? cliPath.replace(/\\/g, '/') : '';
+  const m = hookMessages(lang);
+  const args = `--staged --lang ${lang}`;
   return `#!/bin/sh
 ${HOOK_MARKER}
-# Установлен командой: vibe-scanner install-hook
+# ${m.installedBy}
 
 SOURCE="${sourcePath}"
 NPX_PACKAGE="${source ? '' : `${PACKAGE_NAME}@${PACKAGE_VERSION}`}"
 
 if [ -x "./node_modules/.bin/vibe-scanner" ]; then
-  ./node_modules/.bin/vibe-scanner --staged
+  ./node_modules/.bin/vibe-scanner ${args}
 elif [ -n "$SOURCE" ] && [ -f "$SOURCE" ]; then
-  node "$SOURCE" --staged
+  node "$SOURCE" ${args}
 elif [ -n "$NPX_PACKAGE" ] && command -v npx >/dev/null 2>&1; then
-  npx --yes "$NPX_PACKAGE" --staged
+  npx --yes "$NPX_PACKAGE" ${args}
 else
-  echo "vibe-scanner: сканер не найден — проверка пропущена." >&2
-  echo "Установи его в проект: npm install -D ${PACKAGE_NAME}" >&2
+  echo "${m.notFound}" >&2
+  echo "${m.install}" >&2
   exit 0
 fi
 status=$?
 
 if [ $status -eq 1 ]; then
   echo "" >&2
-  echo "⛔ Коммит заблокирован: vibe-scanner нашёл критичные проблемы (см. выше)." >&2
-  echo "   Исправь их и снова сделай git add. Если это ложное срабатывание —" >&2
-  echo "   добавь путь в .vibescanignore." >&2
-  echo "   (Если выше ошибка npm, а не находки — проверь интернет или установи пакет:" >&2
-  echo "   npm install -D ${PACKAGE_NAME})" >&2
+  echo "${m.blocked}" >&2
+  echo "${m.blockedFix1}" >&2
+  echo "${m.blockedFix2}" >&2
+  echo "${m.npmError1}" >&2
+  echo "${m.npmError2}" >&2
 fi
 exit $status
 `;
@@ -56,7 +71,8 @@ exit $status
 
 // Возвращает { hookPath, backupPath?, runner }
 // options.source — запускать из исходников (по умолчанию: если сканер не из node_modules)
-export function installHook(root, { force = false, cliPath = CLI_PATH, source } = {}) {
+// options.lang — язык сообщений хука и отчёта при коммите
+export function installHook(root, { force = false, cliPath = CLI_PATH, source, lang = DEFAULT_LANG } = {}) {
   root = path.resolve(root);
   source ??= !isInstalledPackage(cliPath);
   let hooksDir;
@@ -65,7 +81,7 @@ export function installHook(root, { force = false, cliPath = CLI_PATH, source } 
       cwd: root, stdio: ['ignore', 'pipe', 'ignore'],
     }).toString().trim();
   } catch {
-    throw new Error('Это не git-репозиторий. Сначала выполни git init.');
+    throw new ScanError('hookNotGit');
   }
   hooksDir = path.resolve(root, hooksDir);
   fs.mkdirSync(hooksDir, { recursive: true });
@@ -76,14 +92,14 @@ export function installHook(root, { force = false, cliPath = CLI_PATH, source } 
     const existing = fs.readFileSync(hookPath, 'utf8');
     if (!existing.includes(HOOK_MARKER)) {
       if (!force) {
-        throw new Error(`Уже есть другой pre-commit хук: ${hookPath}\nЗапусти с --force: старый хук сохранится в pre-commit.backup.`);
+        throw new ScanError('hookExists', { path: hookPath });
       }
       backupPath = `${hookPath}.backup`;
       fs.copyFileSync(hookPath, backupPath);
     }
   }
 
-  fs.writeFileSync(hookPath, hookScript({ cliPath, source }), { mode: 0o755 });
+  fs.writeFileSync(hookPath, hookScript({ cliPath, source, lang }), { mode: 0o755 });
   fs.chmodSync(hookPath, 0o755);
   const runner = source ? `node ${cliPath}` : `npx ${PACKAGE_NAME}@${PACKAGE_VERSION}`;
   return { hookPath, backupPath, runner };

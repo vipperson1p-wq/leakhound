@@ -1,83 +1,97 @@
 #!/usr/bin/env node
-// Запуск: node src/index.js <путь-к-проекту> [--json] [--staged | --history] [--exclude <шаблон>]...
-//         node src/index.js install-hook [путь] [--force]
-import { scanProject } from './scan.js';
+// Usage: vibe-scanner <path> [--json] [--staged | --history] [--exclude <pattern>]... [--lang en|ru]
+//        vibe-scanner install-hook [path] [--force] [--lang en|ru]
+// Language: --lang → VIBESCAN_LANG → LC_ALL / LC_MESSAGES / LANG → system locale → English.
 import { printReport } from './report.js';
 import { installHook } from './hook.js';
-import { scanHistory } from './detectors/history.js';
-import { SEVERITY_ORDER } from './rules.js';
+import { scan, hasSeriousFindings } from './api.js';
+import { detectLang, createT, ScanError } from './i18n/index.js';
 
-function parseArgs(argv) {
+const argv = process.argv.slice(2);
+
+// --lang is read before everything else, so even argument errors are in the right language
+function pickLang(args) {
+  let flag;
+  for (let i = 0; i < args.length; i++) {
+    if (args[i] === '--lang') flag = args[i + 1] ?? '';
+    else if (args[i].startsWith('--lang=')) flag = args[i].slice('--lang='.length);
+  }
+  if (flag === '') return { lang: detectLang(), error: new ScanError('langValue') };
+  try {
+    return { lang: detectLang({ flag }) };
+  } catch (e) {
+    return { lang: detectLang(), error: e };
+  }
+}
+
+const { lang, error: langError } = pickLang(argv);
+const t = createT(lang);
+
+function fail(e) {
+  console.error(e instanceof ScanError ? t(`errors.${e.key}`, e.params) : e.message);
+  process.exit(2);
+}
+if (langError) fail(langError);
+
+function parseArgs(args) {
   const opts = { target: '.', json: false, staged: false, history: false, exclude: [] };
   let targetSet = false;
-  for (let i = 0; i < argv.length; i++) {
-    const a = argv[i];
+  for (let i = 0; i < args.length; i++) {
+    const a = args[i];
     if (a === '--json') opts.json = true;
     else if (a === '--staged') opts.staged = true;
     else if (a === '--history') opts.history = true;
+    else if (a === '--lang') i++;
+    else if (a.startsWith('--lang=')) continue;
     else if (a === '--exclude') {
-      const value = argv[++i];
-      if (!value) fail('После --exclude нужен путь или шаблон, например: --exclude test-project/');
+      const value = args[++i];
+      if (!value) fail(new ScanError('excludeValue'));
       opts.exclude.push(value);
     } else if (a.startsWith('--exclude=')) opts.exclude.push(a.slice('--exclude='.length));
-    else if (a.startsWith('--')) fail(`Неизвестный флаг: ${a}`);
+    else if (a.startsWith('--')) fail(new ScanError('unknownFlag', { flag: a }));
     else if (!targetSet) { opts.target = a; targetSet = true; }
-    else fail(`Лишний аргумент: ${a}`);
+    else fail(new ScanError('extraArg', { arg: a }));
   }
   return opts;
 }
 
-function fail(message) {
-  console.error(message);
-  process.exit(2);
-}
-
-const argv = process.argv.slice(2);
-
-// vibe-scanner install-hook [путь] [--force]
 if (argv[0] === 'install-hook') {
   const rest = argv.slice(1);
-  const unknown = rest.find((a) => a.startsWith('--') && a !== '--force');
-  if (unknown) fail(`Неизвестный флаг: ${unknown}`);
+  let target = '.';
+  let force = false;
+  for (let i = 0; i < rest.length; i++) {
+    const a = rest[i];
+    if (a === '--force') force = true;
+    else if (a === '--lang') i++;
+    else if (a.startsWith('--lang=')) continue;
+    else if (a.startsWith('--')) fail(new ScanError('unknownFlag', { flag: a }));
+    else target = a;
+  }
   try {
-    const { hookPath, backupPath, runner } = installHook(rest.find((a) => !a.startsWith('--')) || '.', {
-      force: rest.includes('--force'),
-    });
-    if (backupPath) console.log(`Старый хук сохранён: ${backupPath}`);
-    console.log(`✅ pre-commit хук установлен: ${hookPath}`);
-    console.log('Теперь перед каждым коммитом проверяются добавленные файлы. Коммит блокируется при критичных и высоких проблемах.');
-    console.log(`Запуск сканера: node_modules/.bin/vibe-scanner, если пакет установлен в проект, иначе — ${runner}.`);
+    const { hookPath, backupPath, runner } = installHook(target, { force, lang });
+    if (backupPath) console.log(t('cli.hookBackup', { path: backupPath }));
+    console.log(t('cli.hookInstalled', { path: hookPath }));
+    console.log(t('cli.hookExplain'));
+    console.log(t('cli.hookRunner', { runner }));
     process.exit(0);
   } catch (e) {
-    fail(e.message);
+    fail(e);
   }
 }
 
 const opts = parseArgs(argv);
-if (opts.staged && opts.history) fail('--staged и --history нельзя использовать вместе.');
 let result;
 try {
-  result = scanProject(opts.target, { exclude: opts.exclude, staged: opts.staged });
-  if (opts.history) {
-    const h = await scanHistory(opts.target, { exclude: opts.exclude });
-    result.findings.push(...h.findings);
-    result.findings.sort((a, b) => SEVERITY_ORDER[a.severity] - SEVERITY_ORDER[b.severity]);
-    result.historyCommitsScanned = h.commitsScanned;
-    result.notChecked = result.notChecked.filter((x) => x.what !== 'Историю git');
-    result.notes.push(h.findings.length
-      ? `Проверена история git: ${h.commitsScanned} коммитов. Найдено в истории: ${h.findings.length}.`
-      : `Проверена история git: ${h.commitsScanned} коммитов — удалённых ключей в истории не найдено.`);
-  }
+  result = await scan(opts.target, { lang, staged: opts.staged, history: opts.history, exclude: opts.exclude });
 } catch (e) {
-  fail(e.message);
+  fail(e);
 }
 
 if (opts.json) {
   console.log(JSON.stringify(result, null, 2));
 } else {
-  printReport(result);
+  printReport(result, t);
 }
 
-// Код выхода 1, если есть серьёзные проблемы — пригодится для CI
-const serious = result.findings.some((f) => f.severity === 'critical' || f.severity === 'high');
-process.exit(serious ? 1 : 0);
+// Exit code 1 on critical/high findings — handy for CI and the pre-commit hook
+process.exit(hasSeriousFindings(result) ? 1 : 0);

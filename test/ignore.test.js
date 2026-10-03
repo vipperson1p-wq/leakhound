@@ -52,7 +52,7 @@ describe('scanProject exclusions', () => {
   test('exclude option skips matching files and adds a note', () => {
     const r = scanProject(leaky(), { exclude: ['fixtures/'] });
     assert.deepEqual(r.findings, []);
-    assert.ok(r.notes.some((n) => n.includes('Исключено файлов: 1')));
+    assert.ok(r.notes.some((n) => n.key === 'excluded' && n.params.count === 1));
   });
 
   test('.vibescanignore is respected', () => {

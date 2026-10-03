@@ -289,7 +289,7 @@ describe('report metadata', () => {
   test('result lists what the scanner does NOT check', () => {
     const r = scanProject('test-project');
     assert.ok(Array.isArray(r.notChecked) && r.notChecked.length >= 5);
-    assert.ok(r.notChecked.some((x) => /git/i.test(x.what)));
+    assert.ok(r.notChecked.includes('git-history'));
   });
 });
 
@@ -300,7 +300,7 @@ describe('SQL / tables created outside migrations', () => {
     const found = sql('alter table public.reports add column title text;');
     assert.deepEqual(ids(found), ['rls-unverified']);
     assert.equal(found[0].severity, 'medium');
-    assert.match(found[0].why, /reports/);
+    assert.equal(found[0].params.table, 'reports');
   });
 
   test('policy / grant / index / trigger references are detected', () => {

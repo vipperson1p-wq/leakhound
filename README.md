@@ -14,7 +14,7 @@ make most often, **before you deploy**:
 Every finding comes with a plain-language explanation and a concrete fix.
 Keys are **always masked** in the output (`sk-pro…****`).
 
-> ⚠️ Reports are currently in **Russian**. English output is planned.
+Reports are in **English** or **Russian** (`--lang ru`, or automatically when your system language is Russian).
 
 ## Quick start
 
@@ -42,9 +42,21 @@ vibe-scanner <path> --history           # also scan git history for removed keys
 vibe-scanner <path> --exclude fixtures/ # skip paths (repeatable)
 vibe-scanner --staged                   # only files staged for commit
 vibe-scanner install-hook [path]        # pre-commit hook: block commits with critical/high findings
+vibe-scanner <path> --lang ru           # report language: en (default) or ru
 ```
 
 Without installing, use `npx vibecode-scanner` instead of `vibe-scanner`.
+
+Language is picked in this order: `--lang` → `VIBESCAN_LANG` → `LC_ALL` / `LC_MESSAGES` / `LANG` → system locale → English.
+`install-hook --lang ru` makes the hook messages and commit-time reports Russian.
+
+### Programmatic use
+
+```js
+import { scan } from 'vibecode-scanner';
+const result = await scan('.', { lang: 'en', history: true });
+// result.findings: [{ ruleId, severity, file, line, snippet (masked), title, why, fix, ... }]
+```
 
 The pre-commit hook runs the scanner from `node_modules/.bin` if the package is installed
 in the project, otherwise via `npx vibecode-scanner@<version>` (pinned to the version that

@@ -29,7 +29,7 @@ describe('install-hook', () => {
     execFileSync('git', ['add', '.'], { cwd: dir });
     const blocked = commit(dir);
     assert.notEqual(blocked.status, 0, 'commit with a secret must fail');
-    assert.match(blocked.stderr, /Коммит заблокирован/);
+    assert.match(blocked.stderr, /Commit blocked/);
     assert.ok(!(blocked.stdout + blocked.stderr).includes(KEY), 'secret must be masked in hook output');
 
     fs.writeFileSync(path.join(dir, 'leak.ts'), 'k = process.env.KEY');
@@ -45,7 +45,7 @@ describe('install-hook', () => {
     execFileSync('git', ['add', '.'], { cwd: dir });
     const r = commit(dir);
     assert.equal(r.status, 0);
-    assert.match(r.stderr, /проверка пропущена/);
+    assert.match(r.stderr, /check skipped/);
   });
 
   test('installed from npm: hook uses npx with a pinned version, no absolute path', () => {

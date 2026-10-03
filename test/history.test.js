@@ -41,7 +41,7 @@ describe('--history', () => {
     assert.equal(f.file, 'src/config.ts');
     assert.equal(f.line, 2);
     assert.equal(f.commit.hash, added);
-    assert.match(f.why, new RegExp(added.slice(0, 7)));
+    assert.equal(f.commit.short, added.slice(0, 7));
     assert.ok(!JSON.stringify(findings).includes(KEY), 'secret must be masked');
   });
 
@@ -123,7 +123,8 @@ describe('--history', () => {
     assert.equal(r.status, 1);
     const out = JSON.parse(r.stdout);
     assert.ok(out.findings.some((f) => f.source === 'history'));
-    assert.ok(!out.notChecked.some((x) => x.what === 'Историю git'));
+    assert.ok(!out.notChecked.some((x) => x.id === 'git-history'));
+    assert.ok(out.findings[0].why.includes(out.findings[0].commit.short), 'localized why mentions the commit');
     assert.ok(!r.stdout.includes(KEY));
   });
 

@@ -32,18 +32,32 @@ from the self-scan via `.vibescanignore`.
 
 ## Adding a secret rule
 
-Secret rules live in [`src/rules.js`](src/rules.js), in the `secretRules` array:
+A rule has two parts: **detection** in [`src/rules.js`](src/rules.js) and **texts**
+in both dictionaries, [`src/i18n/en.js`](src/i18n/en.js) and [`src/i18n/ru.js`](src/i18n/ru.js).
+
+1. Detection — add to the `secretRules` array:
 
 ```js
 {
   id: 'example-key',                 // kebab-case, stable: used in JSON, baselines, issues
-  title: 'Ключ Example в коде',      // shown in the report (Russian for now)
   severity: 'critical',              // critical | high | medium | low
   regex: /\bexk_live_[A-Za-z0-9]{32}\b/g,
+},
+```
+
+2. Texts — add the same id under `rules` in **both** `en.js` and `ru.js`:
+
+```js
+'example-key': {
+  title: 'Example API key in code',
   why: 'What an attacker can do with it, in plain words.',
   fix: 'How to revoke/rotate it and where to keep it instead.',
 },
 ```
+
+Write for people who are new to security: short sentences, no jargon, say what to click.
+Can't write Russian? Add the English text to both files and say so in the PR — a maintainer
+will translate it. `test/i18n.test.js` fails if a key is missing in either language.
 
 Regex checklist:
 

@@ -9,18 +9,10 @@ import readline from 'node:readline';
 import { secretRules, jwtRegex, serviceRoleRule, KNOWN_EXAMPLE_KEYS, SEVERITY_ORDER } from '../rules.js';
 import { listFiles, shouldSkip, readText, mask, isEnvFile, decodeJwtPayload, makeFinding } from '../scan.js';
 import { IGNORE_FILE, parseIgnoreFile, compileIgnore } from '../ignore.js';
+import { ScanError } from '../i18n/index.js';
 
-export const historyEnvRule = {
-  id: 'env-file-in-history',
-  title: 'Файл .env был в коммите и остался в истории git',
-  severity: 'high',
-  why: 'Файл удалён из репозитория, но его содержимое по-прежнему лежит в старом коммите. Любой, у кого есть доступ к репозиторию, может его достать.',
-  fix: 'Считай все ключи из этого файла утёкшими: перевыпусти каждый из них. Удаления файла недостаточно.',
-};
-
-const HISTORY_FIX = 'Перевыпусти ключ (старый отзови) — это главное, удаления из файла недостаточно. '
-  + 'Переписывать историю (git filter-repo, BFG) имеет смысл только ПОСЛЕ смены ключа: '
-  + 'если репозиторий уже кто-то клонировал или он был публичным, старый ключ всё равно мог утечь.';
+// Texts: src/i18n (rules.env-file-in-history, and history.* for keys found in history)
+export const historyEnvRule = { id: 'env-file-in-history', severity: 'high' };
 
 const hash = (s) => crypto.createHash('sha256').update(s).digest('hex');
 
@@ -50,7 +42,7 @@ function assertGitRepo(root) {
   try {
     execFileSync('git', ['rev-parse', '--is-inside-work-tree'], { cwd: root, stdio: 'ignore' });
   } catch {
-    throw new Error('Режим --history работает только внутри git-репозитория.');
+    throw new ScanError('historyNotGit');
   }
 }
 
@@ -96,7 +88,7 @@ async function walkHistory(root, { onAdded, onNewFile }) {
   }
 
   const code = await exited;
-  if (code !== 0) throw new Error(`git log завершился с ошибкой: ${stderr.trim()}`);
+  if (code !== 0) throw new ScanError('gitLogFailed', { details: stderr.trim() });
   return commits;
 }
 
@@ -138,16 +130,7 @@ export async function scanHistory(root, { exclude = [] } = {}) {
 
   const findings = [];
   for (const s of secrets.values()) {
-    findings.push({
-      ...makeFinding(s.rule, s.file, s.lineNo, {
-        snippet: s.snippet,
-        why: `${s.rule.why} Ключ уже удалён из файлов, но остался в истории git: его добавили в коммите ${s.commit.short} (${s.commit.date}).`,
-        fix: HISTORY_FIX,
-        commit: s.commit,
-      }),
-      title: `${s.rule.title} — в истории git`,
-      source: 'history',
-    });
+    findings.push({ ...makeFinding(s.rule, s.file, s.lineNo, { snippet: s.snippet, commit: s.commit }), source: 'history' });
   }
   for (const [file, commit] of envFiles) {
     findings.push({ ...makeFinding(historyEnvRule, file, null, { commit }), source: 'history' });

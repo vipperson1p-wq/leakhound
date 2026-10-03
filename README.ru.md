@@ -40,9 +40,14 @@ vibe-scanner <путь> --history            # плюс ключи, удалён
 vibe-scanner <путь> --exclude fixtures/  # пропустить путь (флаг можно повторять)
 vibe-scanner --staged                    # только файлы из git add (то, что уйдёт в коммит)
 vibe-scanner install-hook [путь]         # pre-commit хук: блокирует коммит при критичных проблемах
+vibe-scanner <путь> --lang ru            # язык отчёта: en (по умолчанию) или ru
 ```
 
 Без установки — `npx vibecode-scanner` вместо `vibe-scanner`.
+
+Язык отчёта — английский по умолчанию, русский — через `--lang ru` или автоматически, если язык системы русский.
+Порядок: `--lang` → `VIBESCAN_LANG` → `LC_ALL` / `LC_MESSAGES` / `LANG` → язык системы → английский.
+`install-hook --lang ru` — сообщения хука и отчёт при коммите на русском.
 
 Хук запускает сканер из `node_modules/.bin`, если пакет установлен в проект, иначе — через
 `npx vibecode-scanner@<версия>` (версия закреплена: та, что ставила хук; новую сам не скачивает).
@@ -115,7 +120,9 @@ npm run scan:self      # самопроверка сканером
 
 Структура:
 
-    src/rules.js       — все правила
+    src/rules.js       — все правила (обнаружение)
+    src/i18n/          — тексты на английском и русском
+    src/api.js         — программный API: scan()
     src/scan.js        — движок: собирает файлы и применяет правила
     src/detectors/     — отдельные детекторы (history.js — история git)
     src/ignore.js      — исключения (--exclude, .vibescanignore)

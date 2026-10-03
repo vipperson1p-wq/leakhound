@@ -7,6 +7,7 @@ import {
   NOT_CHECKED,
 } from './rules.js';
 import { IGNORE_FILE, parseIgnoreFile, compileIgnore } from './ignore.js';
+import { ScanError } from './i18n/index.js';
 
 const IGNORED_DIRS = new Set([
   'node_modules', '.git', '.next', 'dist', 'build', 'out', '.vercel',
@@ -118,17 +119,20 @@ export function decodeJwtPayload(token) {
   }
 }
 
+// Findings are language-neutral: texts come from src/i18n by ruleId.
+// extra.variant picks an alternative "why" (rules.<id>.why_<variant>),
+// extra.params fill {placeholders}, extra.snippetKey makes a localized synthetic snippet.
 export function makeFinding(rule, file, line, extra = {}) {
   return {
     ruleId: rule.id,
-    title: rule.title,
     severity: extra.severity || rule.severity,
     file,
     line,
     snippet: extra.snippet || null,
     clientSide: extra.clientSide ?? null,
-    why: extra.why || rule.why,
-    fix: extra.fix || rule.fix,
+    ...(extra.variant && { variant: extra.variant }),
+    ...(extra.params && { params: extra.params }),
+    ...(extra.snippetKey && { snippetKey: extra.snippetKey }),
     ...(extra.commit && { commit: extra.commit }),
   };
 }
@@ -205,7 +209,8 @@ export function scanEnvFile(rel, content, findings = []) {
       findings.push(makeFinding(serviceRoleRule, rel, i + 1, {
         snippet: `${m[1]}=${mask(value)}`,
         clientSide: true,
-        why: `В публичной переменной ${m[1]} лежит ключ service_role, а не anon. Он попадёт в браузер, и любой посетитель получит полный доступ к базе в обход RLS.`,
+        variant: 'publicEnv',
+        params: { name: m[1] },
       }));
     }
   });
@@ -266,9 +271,7 @@ export function scanSqlFiles(sqlFiles, findings = []) {
       const selectOnly = /\bfor\s+select\b/i.test(stmt);
       findings.push(makeFinding(permissivePolicyRule, rel, lineOf(content, m.index), {
         severity: selectOnly ? 'low' : 'high',
-        why: selectOnly
-          ? 'Любой (даже без входа) может читать все строки этой таблицы. Нормально для публичных данных (посты блога), опасно для личных (профили, сообщения).'
-          : undefined,
+        variant: selectOnly ? 'selectOnly' : undefined,
         snippet: stmt.replace(/\s+/g, ' ').slice(0, 160),
       }));
     }
@@ -277,7 +280,8 @@ export function scanSqlFiles(sqlFiles, findings = []) {
   for (const t of created) {
     if (!rlsEnabled.has(t.table)) {
       findings.push(makeFinding(rlsMissingRule, t.file, t.line, {
-        snippet: `CREATE TABLE ${t.table} … (RLS нигде не включён)`,
+        snippetKey: 'rlsMissing',
+        params: { table: t.table },
       }));
     }
   }
@@ -287,8 +291,8 @@ export function scanSqlFiles(sqlFiles, findings = []) {
   for (const [table, ref] of referenced) {
     if (createdSet.has(table) || rlsEnabled.has(table)) continue;
     findings.push(makeFinding(rlsUnverifiedRule, ref.file, ref.line, {
-      snippet: `${table} — нет CREATE TABLE и ENABLE ROW LEVEL SECURITY в миграциях`,
-      why: rlsUnverifiedRule.why.replace('<table>', table),
+      snippetKey: 'rlsUnverified',
+      params: { table },
     }));
   }
   return findings;
@@ -323,7 +327,7 @@ export function scanProject(root, { exclude = [], staged = false } = {}) {
   root = path.resolve(root);
   let { mode, files } = listFiles(root);
   if (staged && mode !== 'git') {
-    throw new Error('Режим --staged работает только внутри git-репозитория.');
+    throw new ScanError('stagedNotGit');
   }
   const stagedSet = staged ? new Set(listStagedFiles(root)) : null;
   if (staged) mode = 'staged';
@@ -380,7 +384,7 @@ export function scanProject(root, { exclude = [], staged = false } = {}) {
   const protectsEnv = gitignore && gitignore.split('\n').some((l) => /^\s*\/?\.env/.test(l));
   if (!protectsEnv) {
     findings.push(makeFinding(gitignoreRule, '.gitignore', null, {
-      snippet: gitignore === null ? 'Файл .gitignore отсутствует' : 'Нет строки для .env',
+      snippetKey: gitignore === null ? 'gitignoreMissing' : 'gitignoreNoEnv',
     }));
   }
 
@@ -390,20 +394,20 @@ export function scanProject(root, { exclude = [], staged = false } = {}) {
   if (stagedSet) {
     result = findings.filter((f) => stagedSet.has(f.file));
     notes.push(stagedSet.size === 0
-      ? 'В индексе нет файлов для проверки (git add ещё не выполнялся).'
-      : `Проверены только файлы из будущего коммита: ${scanned}.`);
+      ? { key: 'stagedEmpty' }
+      : { key: 'stagedOnly', params: { count: scanned } });
   }
 
   if (mode === 'folder') {
-    notes.push('Папка не является git-репозиторием: проверены все файлы, а в .env-файлах — только публичные переменные (NEXT_PUBLIC_, VITE_ и т.п.).');
+    notes.push({ key: 'folderMode' });
   }
   if (excluded > 0) {
-    notes.push(`Исключено файлов: ${excluded} (${IGNORE_FILE} / --exclude).`);
+    notes.push({ key: 'excluded', params: { count: excluded } });
   }
   if (sqlFiles.length === 0 && !stagedSet) {
-    notes.push('SQL-миграции не найдены: проверка RLS не выполнялась. Для Supabase это обычно папка supabase/migrations.');
+    notes.push({ key: 'noSql' });
   }
 
   result.sort((a, b) => SEVERITY_ORDER[a.severity] - SEVERITY_ORDER[b.severity]);
-  return { root, mode, filesScanned: scanned, findings: result, notes, notChecked: NOT_CHECKED };
+  return { root, mode, filesScanned: scanned, findings: result, notes, notChecked: [...NOT_CHECKED] };
 }

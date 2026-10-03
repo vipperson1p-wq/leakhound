@@ -52,7 +52,7 @@ describe('--staged', () => {
     const { dir } = repo();
     const r = scanProject(dir, { staged: true });
     assert.deepEqual(r.findings, []);
-    assert.ok(r.notes.some((n) => n.includes('В индексе нет файлов')));
+    assert.ok(r.notes.some((n) => n.key === 'stagedEmpty'));
   });
 
   test('staged .env file is critical', () => {
