@@ -43,7 +43,12 @@
    - **Переименование 2026-10-03:** Vibe Scanner / `vibecode-scanner` → **LeakHound / `leakhound`** (с 0.1.0). `vibecode-scanner` (0.1.0, 0.1.1) — пометить deprecated после публикации `leakhound`. Имя `vibe-scanner` в npm — **чужой пакет**: никогда не писать `npx vibe-scanner`; `test/package-name.test.js` ловит запуск обоих старых имён.
    - Совместимость со старым именем: хук с маркером `# vibe-scanner pre-commit hook` заменяется без `--force`; `install-skill` удаляет наш старый skill (`vibe-scanner/`, `vibe-scanner.mdc` с нашим маркером); `.vibescanignore` читается вместе с `.leakhoundignore`. `VIBESCAN_LANG` → `LEAKHOUND_LANG` без совместимости.
 4. [x] MCP + skill — одной задачей (в коде; в npm попадёт со следующей публикацией).
-5. [ ] Простой лендинг.
+5. [x] Простой лендинг: `site/` (статика без сборки, главная + `/install`), развёрнут 2026-10-03 на **https://leakhound-sable.vercel.app** (имя `leakhound.vercel.app` занято).
+   - Vercel: команда `vipperson1p-5650s-projects` (Hobby), проект `leakhound` (`prj_Plh63ZkqsgFBugKmnG07kbReIkR3`), root `site`, без фреймворка. **Не привязан к GitHub** — деплой вручную загрузкой файлов из закоммиченного `site/` (target production), чтобы push в `main` не выкатывал продакшен без подтверждения владельца. После деплоя сверять sha1 каждого файла с коммитом.
+   - Защита: Vercel Authentication только для preview; продакшен на *.vercel.app публичный.
+   - Заголовки — в `site/vercel.json` (CSP только self + Google Fonts, frame-ancestors 'none', nosniff, Referrer-Policy и др.), тест в `test/site.test.js`. Ничего инлайнового в HTML (скрипты, style=, on*=) — сломает CSP, тест ловит.
+   - [ ] Свой домен — отдельно, по решению владельца. HSTS без includeSubDomains — специально, чтобы не задеть поддомены будущего домена.
+   - [ ] Ссылка на донаты на сайте — заглушка `[DONATION LINK]` (как в README).
 6. [ ] Пост в сообществах.
 7. [ ] Профессиональные правила — после отзывов пользователей.
 
