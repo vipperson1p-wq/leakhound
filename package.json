@@ -1,6 +1,6 @@
 {
   "name": "leakhound",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "Security scanner for vibe-coded Next.js / Vite + Supabase apps: leaked keys, public env secrets, .env in git, missing RLS",
   "type": "module",
   "main": "./src/api.js",
