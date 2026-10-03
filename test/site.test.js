@@ -27,7 +27,9 @@ const CLI_COMMANDS = new Set([
   'npx leakhound install-hook',
   'npx leakhound install-skill --user',
   'npx leakhound install-skill --cursor',
+  'leakhound', // after npm install -g
 ]);
+const NPM_COMMANDS = new Set(['npm install -g leakhound', 'npm install -D leakhound', 'npm install']);
 const skill = fs.readFileSync('skills/leakhound/SKILL.md', 'utf8');
 const SUBCOMMANDS = /argument-hint:\s*"?\[([^\]]+)\]/.exec(skill)[1].split('|').map((s) => s.trim());
 
@@ -37,7 +39,8 @@ describe('site commands exist', () => {
       const all = snippets(page);
       assert.ok(all.length > 3, 'found the snippets');
       for (const s of all) {
-        if (s.startsWith('npx ')) assert.ok(CLI_COMMANDS.has(s), `unknown CLI command on the site: ${s}`);
+        if (s.startsWith('npx ') || s.startsWith('leakhound')) assert.ok(CLI_COMMANDS.has(s), `unknown CLI command on the site: ${s}`);
+        else if (s.startsWith('npm ')) assert.ok(NPM_COMMANDS.has(s), `unknown npm command on the site: ${s}`);
         else if (s.startsWith('/leakhound')) {
           const sub = s.split(/\s+/)[1];
           assert.ok(!sub || SUBCOMMANDS.includes(sub), `unknown /leakhound subcommand: ${s}`);
@@ -50,6 +53,23 @@ describe('site commands exist', () => {
       assert.doesNotMatch(html[page], /vibe-?scanner|vibecode/i, 'no old or foreign package names');
     });
   }
+});
+
+test('package.json has the bin the global install promises', () => {
+  const pkg = JSON.parse(fs.readFileSync('package.json', 'utf8'));
+  assert.deepEqual(pkg.bin, { leakhound: 'src/index.js' });
+});
+
+test('"Other ways to install" is a real details/summary, and the offline claim matches the hook', () => {
+  const page = html['site/install/index.html'];
+  const more = /<details class="more">([\s\S]*?)<\/details>/.exec(page);
+  assert.ok(more, 'details block exists');
+  assert.match(more[1], /<summary>Other ways to install<\/summary>/);
+  assert.ok(more[1].includes('npm install -g leakhound') && more[1].includes('npm install -D leakhound'));
+  // "without internet" is only true for the local copy: the hook runs node_modules/.bin first
+  const hook = fs.readFileSync('src/hook.js', 'utf8');
+  assert.ok(hook.indexOf('./node_modules/.bin/leakhound') < hook.indexOf('npx --yes'), 'hook tries the local copy before npx');
+  assert.doesNotMatch(more[1].split('In your project')[0], /internet|offline/i, 'no offline claim for the global install');
 });
 
 describe('the blocked-commit example on /install is the real hook output', () => {
