@@ -1,0 +1,211 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Install LeakHound</title>
+<meta name="description" content="Connect LeakHound to Claude Code, Cursor or Claude Desktop, run your first scan and guard every commit. About two minutes, everything runs on your machine.">
+<meta name="theme-color" content="#0F1110">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23F5A524' stroke-width='2' stroke-linecap='round'%3E%3Cellipse cx='12' cy='16' rx='4.6' ry='3.8'/%3E%3Ccircle cx='5.6' cy='10.2' r='1.9'/%3E%3Ccircle cx='9.4' cy='6.2' r='1.9'/%3E%3Ccircle cx='14.6' cy='6.2' r='1.9'/%3E%3Ccircle cx='18.4' cy='10.2' r='1.9'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&amp;family=IBM+Plex+Sans:wght@400;500;600&amp;family=JetBrains+Mono:wght@400;600&amp;display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/styles.css">
+<script src="/assets/site.js" defer></script>
+</head>
+<body class="page-install">
+<a class="skip-link" href="#main">Skip to content</a>
+<div id="copy-status" class="visually-hidden" aria-live="polite"></div>
+
+<header class="site-header">
+  <nav class="wrap site-nav" aria-label="Main">
+    <a class="brand" href="/" aria-label="LeakHound home">
+      <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><ellipse cx="12" cy="16" rx="4.6" ry="3.8"/><circle cx="5.6" cy="10.2" r="1.9"/><circle cx="9.4" cy="6.2" r="1.9"/><circle cx="14.6" cy="6.2" r="1.9"/><circle cx="18.4" cy="10.2" r="1.9"/></svg>
+      <span class="brand-name">LeakHound</span>
+    </a>
+    <div class="nav-links">
+      <a href="/">Home</a>
+      <a href="/install" aria-current="page">Install</a>
+      <a href="https://github.com/vipperson1p-wq/leakhound">GitHub</a>
+    </div>
+  </nav>
+</header>
+
+<main id="main">
+
+<section class="wrap install-hero">
+  <h1>Install LeakHound</h1>
+  <p>Three steps, about two minutes. Everything runs on your machine. You need Node.js 18 or newer.</p>
+</section>
+
+<!-- Step 1 -->
+<section id="step1" class="wrap install-step" aria-labelledby="step1-title">
+  <div class="step-grid">
+    <div class="step-side">
+      <div class="step-n">Step 1</div>
+      <h2 id="step1-title">Connect it to your tool</h2>
+      <p>Pick where you write code. The MCP server lets your AI run scans. The skill tells it when to.</p>
+    </div>
+    <div class="step-main">
+      <div class="tabs">
+        <div class="tablist" role="tablist" aria-label="Your tool">
+          <button type="button" class="tab" role="tab" id="tab-claude" aria-controls="panel-claude" aria-selected="true">Claude Code</button>
+          <button type="button" class="tab" role="tab" id="tab-cursor" aria-controls="panel-cursor" aria-selected="false" tabindex="-1">Cursor</button>
+          <button type="button" class="tab" role="tab" id="tab-desktop" aria-controls="panel-desktop" aria-selected="false" tabindex="-1">Claude Desktop</button>
+          <button type="button" class="tab" role="tab" id="tab-cli" aria-controls="panel-cli" aria-selected="false" tabindex="-1">Terminal only</button>
+        </div>
+
+        <div class="tabpanel" role="tabpanel" id="panel-claude" aria-labelledby="tab-claude" tabindex="0">
+          <div class="code-block">
+            <div class="code-head"><span>Add the MCP server (terminal)</span><button type="button" class="copy-btn is-ghost" data-copy-target="code-claude-mcp" aria-label="Copy: Add the MCP server">Copy</button></div>
+            <pre id="code-claude-mcp">claude mcp add leakhound --scope user -- npx -y leakhound mcp</pre>
+          </div>
+          <div class="code-block">
+            <div class="code-head"><span>Install the skill for /leakhound (terminal)</span><button type="button" class="copy-btn is-ghost" data-copy-target="code-claude-skill" aria-label="Copy: Install the skill">Copy</button></div>
+            <pre id="code-claude-skill">npx leakhound install-skill --user</pre>
+          </div>
+          <p class="small">Start a new Claude Code session so it picks up the server.</p>
+        </div>
+
+        <div class="tabpanel" role="tabpanel" id="panel-cursor" aria-labelledby="tab-cursor" tabindex="0" hidden>
+          <div class="code-block">
+            <div class="code-head"><span>Add to .cursor/mcp.json</span><button type="button" class="copy-btn is-ghost" data-copy-target="code-cursor-mcp" aria-label="Copy: .cursor/mcp.json">Copy</button></div>
+            <pre id="code-cursor-mcp">{
+  "mcpServers": {
+    "leakhound": {
+      "command": "npx",
+      "args": ["-y", "leakhound", "mcp"]
+    }
+  }
+}</pre>
+          </div>
+          <div class="code-block">
+            <div class="code-head"><span>Install the skill for /leakhound (terminal)</span><button type="button" class="copy-btn is-ghost" data-copy-target="code-cursor-skill" aria-label="Copy: Install the skill">Copy</button></div>
+            <pre id="code-cursor-skill">npx leakhound install-skill --cursor</pre>
+          </div>
+          <p class="small">Reload Cursor after saving the file.</p>
+        </div>
+
+        <div class="tabpanel" role="tabpanel" id="panel-desktop" aria-labelledby="tab-desktop" tabindex="0" hidden>
+          <div class="code-block">
+            <div class="code-head"><span>Add to claude_desktop_config.json</span><button type="button" class="copy-btn is-ghost" data-copy-target="code-desktop-mcp" aria-label="Copy: claude_desktop_config.json">Copy</button></div>
+            <pre id="code-desktop-mcp">{
+  "mcpServers": {
+    "leakhound": {
+      "command": "npx",
+      "args": ["-y", "leakhound", "mcp"]
+    }
+  }
+}</pre>
+          </div>
+          <p class="small">Restart Claude Desktop after saving the file.</p>
+        </div>
+
+        <div class="tabpanel" role="tabpanel" id="panel-cli" aria-labelledby="tab-cli" tabindex="0" hidden>
+          <div class="code-block">
+            <div class="code-head"><span>Scan the project</span><button type="button" class="copy-btn is-ghost" data-copy-target="code-cli-scan" aria-label="Copy: Scan the project">Copy</button></div>
+            <pre id="code-cli-scan">npx leakhound</pre>
+          </div>
+          <div class="code-block">
+            <div class="code-head"><span>Include old commits</span><button type="button" class="copy-btn is-ghost" data-copy-target="code-cli-history" aria-label="Copy: Include old commits">Copy</button></div>
+            <pre id="code-cli-history">npx leakhound --history</pre>
+          </div>
+          <p class="small">No AI needed. Run it in your project folder.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Step 2 -->
+<section class="wrap install-step" aria-labelledby="step2-title">
+  <div class="step-grid">
+    <div class="step-side">
+      <div class="step-n">Step 2</div>
+      <h2 id="step2-title">Run your first scan</h2>
+      <p>Type a command in your AI chat in Claude Code or Cursor. After that, the assistant also scans on its own before commits and after you add keys or write migrations.</p>
+    </div>
+    <div class="step-main">
+      <ul class="slash-list">
+        <li class="slash"><code>/leakhound</code><span>Scan the project and explain every finding in plain words.</span><button type="button" class="copy-btn is-accent" data-copy="/leakhound" aria-label="Copy /leakhound">Copy</button></li>
+        <li class="slash"><code>/leakhound history</code><span>Also search old commits for keys you deleted from files.</span><button type="button" class="copy-btn" data-copy="/leakhound history" aria-label="Copy /leakhound history">Copy</button></li>
+        <li class="slash"><code>/leakhound staged</code><span>Check only what goes into your next commit.</span><button type="button" class="copy-btn" data-copy="/leakhound staged" aria-label="Copy /leakhound staged">Copy</button></li>
+        <li class="slash"><code>/leakhound hook</code><span>Install the pre-commit hook. Asks you first.</span><button type="button" class="copy-btn" data-copy="/leakhound hook" aria-label="Copy /leakhound hook">Copy</button></li>
+        <li class="slash"><code>/leakhound fix</code><span>Fix critical findings one by one, then list the keys to rotate.</span><button type="button" class="copy-btn" data-copy="/leakhound fix" aria-label="Copy /leakhound fix">Copy</button></li>
+      </ul>
+      <div class="fallback">
+        <div class="fallback-text">
+          <span class="label">No slash commands, e.g. Claude Desktop? Paste this instead:</span>
+          <span class="prompt-text" id="fallback-prompt">Scan this project with LeakHound and explain what you find in plain words.</span>
+        </div>
+        <button type="button" class="copy-btn is-ghost" data-copy-target="fallback-prompt" aria-label="Copy prompt">Copy</button>
+      </div>
+      <p class="terminal-note">Terminal only? Run <code>npx leakhound</code>, or <code>npx leakhound --history</code> to include old commits.</p>
+    </div>
+  </div>
+</section>
+
+<!-- Step 3 -->
+<section class="wrap install-step" aria-labelledby="step3-title">
+  <div class="step-grid">
+    <div class="step-side">
+      <div class="step-n">Step 3</div>
+      <h2 id="step3-title">Guard every commit</h2>
+      <p>A git hook checks what you are about to commit and stops it if a key is inside. Works even when you commit without AI.</p>
+    </div>
+    <div class="step-main gap-12">
+      <div class="cmd">
+        <span class="prompt" aria-hidden="true">$</span><span class="cmd-text">npx leakhound install-hook</span>
+        <button type="button" class="copy-btn is-accent" data-copy="npx leakhound install-hook" aria-label="Copy npx leakhound install-hook">Copy</button>
+      </div>
+      <div class="hook-demo" role="img" aria-label="Example: git commit is blocked because an OpenAI key is in the code">
+        <div><span class="t-dim">$</span> git commit -m "add chat"</div>
+        <div><span class="badge critical">CRITICAL</span> OpenAI key in code — app/api/chat/route.ts:4</div>
+        <div class="t-dim">Commit blocked. Move the key to .env and try again.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Step 4 -->
+<section class="wrap install-step" aria-labelledby="step4-title">
+  <div class="step-grid">
+    <div class="step-side">
+      <div class="step-n">Step 4</div>
+      <h2 id="step4-title">Help the hound get better</h2>
+      <p>LeakHound is free and built in the open. Feedback from real projects is what improves it.</p>
+    </div>
+    <div class="step-main">
+      <ul class="loop">
+        <li><a href="https://github.com/vipperson1p-wq/leakhound">
+          <span class="loop-text"><span class="loop-title">Star on GitHub</span><span class="loop-sub">Helps other vibe coders find it.</span></span>
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17L17 7M9 7h8v8"/></svg>
+        </a></li>
+        <li><a href="https://github.com/vipperson1p-wq/leakhound/issues/new/choose">
+          <span class="loop-text"><span class="loop-title">Report a false positive or a missed leak</span><span class="loop-sub">Open an issue. Never paste a real key.</span></span>
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17L17 7M9 7h8v8"/></svg>
+        </a></li>
+        <!-- TODO: donation link -->
+        <li><a href="#">
+          <span class="loop-text"><span class="loop-title">Support the project</span><span class="loop-sub">[DONATION LINK]</span></span>
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17L17 7M9 7h8v8"/></svg>
+        </a></li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<footer class="site-footer">
+  <div class="wrap footer-inner">
+    <span>LeakHound · MIT License</span>
+    <div class="footer-links">
+      <a href="/">Home</a>
+      <a href="https://github.com/vipperson1p-wq/leakhound">GitHub</a>
+      <a href="https://www.npmjs.com/package/leakhound">npm</a>
+    </div>
+  </div>
+</footer>
+</body>
+</html>

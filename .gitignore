@@ -4,3 +4,6 @@ node_modules/
 !.env.example
 # Фикстура с фейковыми ключами для тестов
 !test-project/.env.local
+
+# Design sources from the canvas editor — reference only, not part of the repo
+design/
