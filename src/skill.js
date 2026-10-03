@@ -1,35 +1,31 @@
-// `leakhound install-skill`: puts the agent skill where the AI tool looks for it.
-//   project (default) → <project>/.claude/skills/leakhound/SKILL.md   (Claude Code, Agent Skills standard)
-//   --user            → ~/.claude/skills/leakhound/SKILL.md
-//   --cursor          → <project>/.cursor/rules/leakhound.mdc         (Cursor rule)
+// `leakhound install-skill`: puts the agent skill (SKILL.md + reference/) where the AI tool looks for it.
+// The same folder is the auto-invoked skill and the `/leakhound [history|staged|hook|fix]` command.
+//   project (default) → <project>/.claude/skills/leakhound/   (Claude Code; Cursor reads it too)
+//   --user            → ~/.claude/skills/leakhound/
+//   --cursor          → <project>/.cursor/skills/leakhound/   (Cursor 2.4+)
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { ScanError } from './i18n/index.js';
 
-export const SKILL_SOURCE = fileURLToPath(new URL('../skills/leakhound/SKILL.md', import.meta.url));
+export const SKILL_DIR = fileURLToPath(new URL('../skills/leakhound', import.meta.url));
+export const SKILL_SOURCE = path.join(SKILL_DIR, 'SKILL.md');
 export const SKILL_MARKER = '<!-- leakhound skill';
 // Before the rename the package was vibecode-scanner and the skill lived under vibe-scanner/
 const LEGACY_SKILL_MARKER = '<!-- vibe-scanner skill';
 
-function splitFrontmatter(text) {
-  const m = /^---\r?\n([\s\S]*?)\r?\n---\r?\n/.exec(text);
-  if (!m) throw new Error('SKILL.md has no frontmatter');
-  const description = /^description:\s*(.+)$/m.exec(m[1])?.[1].trim();
-  return { description, body: text.slice(m[0].length) };
-}
-
-// Cursor rules use their own frontmatter; the agent decides when to apply it by description
-export function toCursorRule(skillText) {
-  const { description, body } = splitFrontmatter(skillText);
-  return `---\ndescription: ${description}\nglobs:\nalwaysApply: false\n---\n${body}`;
+// Every file of the skill, as paths relative to SKILL_DIR
+export function skillFiles(dir = SKILL_DIR, prefix = '') {
+  return fs.readdirSync(dir, { withFileTypes: true }).flatMap((e) => {
+    const rel = prefix ? `${prefix}/${e.name}` : e.name;
+    return e.isDirectory() ? skillFiles(path.join(dir, e.name), rel) : [rel];
+  }).sort();
 }
 
 export function skillTarget({ where = 'project', root = '.', home = os.homedir() } = {}) {
-  if (where === 'user') return path.join(home, '.claude', 'skills', 'leakhound', 'SKILL.md');
-  if (where === 'cursor') return path.join(path.resolve(root), '.cursor', 'rules', 'leakhound.mdc');
-  return path.join(path.resolve(root), '.claude', 'skills', 'leakhound', 'SKILL.md');
+  const base = where === 'user' ? home : path.resolve(root);
+  return path.join(base, where === 'cursor' ? '.cursor' : '.claude', 'skills', 'leakhound', 'SKILL.md');
 }
 
 function legacyTarget({ where = 'project', root = '.', home = os.homedir() } = {}) {
@@ -52,17 +48,20 @@ function removeLegacyCopy(opts) {
   return file;
 }
 
-// Returns { file, overwritten, removedLegacy? }. Our own older copy is updated; a foreign file needs --force.
+// Returns { file, overwritten, removedLegacy? }. Our own older copy is replaced as a whole
+// (so files dropped from a newer version disappear); a foreign SKILL.md needs --force.
 export function installSkill({ where = 'project', root = '.', force = false, home } = {}) {
-  const source = fs.readFileSync(SKILL_SOURCE, 'utf8');
-  const content = where === 'cursor' ? toCursorRule(source) : source;
   const file = skillTarget({ where, root, home });
+  const dir = path.dirname(file);
   const exists = fs.existsSync(file);
-  if (exists && !force && !fs.readFileSync(file, 'utf8').includes(SKILL_MARKER)) {
-    throw new ScanError('skillExists', { path: file });
+  const ours = exists && fs.readFileSync(file, 'utf8').includes(SKILL_MARKER);
+  if (exists && !ours && !force) throw new ScanError('skillExists', { path: file });
+  if (ours) fs.rmSync(dir, { recursive: true, force: true });
+  for (const rel of skillFiles()) {
+    const to = path.join(dir, ...rel.split('/'));
+    fs.mkdirSync(path.dirname(to), { recursive: true });
+    fs.copyFileSync(path.join(SKILL_DIR, ...rel.split('/')), to);
   }
-  fs.mkdirSync(path.dirname(file), { recursive: true });
-  fs.writeFileSync(file, content);
   const removedLegacy = removeLegacyCopy({ where, root, home });
   return { file, overwritten: exists, removedLegacy };
 }

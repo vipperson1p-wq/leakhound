@@ -91,6 +91,7 @@ if (argv[0] === 'install-skill') {
     console.log(t(overwritten ? 'cli.skillUpdated' : 'cli.skillInstalled', { path: file }));
     if (removedLegacy) console.log(t('cli.skillLegacyRemoved', { path: removedLegacy }));
     console.log(t(where === 'cursor' ? 'cli.skillExplainCursor' : 'cli.skillExplain'));
+    console.log(t('cli.skillCommands'));
     process.exit(0);
   } catch (e) {
     fail(e);

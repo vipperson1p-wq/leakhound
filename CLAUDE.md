@@ -17,7 +17,7 @@
 - `src/scan.js` — движок: собирает файлы (через `git ls-files`, если это репозиторий) и применяет правила.
 - `src/report.js` — вывод в терминал. `src/index.js` — CLI (`--json`, `--staged`, `--history`, `--exclude`, `--lang`, `--help`, `--version`, `install-hook`).
 - `src/ignore.js` — исключения (`.leakhoundignore`; старый `.vibescanignore` тоже читается), `src/hook.js` — pre-commit хук.
-- `src/mcp.js` — MCP-сервер (stdio), `src/skill.js` + `skills/leakhound/SKILL.md` — skill для AI-ассистентов.
+- `src/mcp.js` — MCP-сервер (stdio), `src/skill.js` + `skills/leakhound/` (SKILL.md + reference/) — skill и слэш-команда `/leakhound` для AI-ассистентов.
 - `src/detectors/history.js` — `--history`: ключи, удалённые из файлов, но оставшиеся в истории git.
 - `test/` — тесты (`npm test`). Фикстура вручную: `npm run scan:fixture`, самопроверка: `npm run scan:self`.
 - `test-project/` — НАМЕРЕННО уязвимый проект с ФЕЙКОВЫМИ ключами для тестов. Не исправлять его. Исключать из самопроверки.
@@ -90,7 +90,9 @@
 - [x] Ключи всегда замаскированы, файлы целиком не возвращаются (только строки ≤160 символов), максимум 50 находок в ответе.
 - [x] Всё из репозитория (пути, код, сообщения коммитов) — в `<repository-data>…</repository-data>`, внутри вычищены переводы строк и угловые скобки — файл не может «закрыть» тег. Тест с атакой через содержимое файла и сообщение коммита — `test/mcp.test.js`.
 - [x] Инструкции по подключению для Claude Code, Cursor и Claude Desktop — в README (en/ru).
-- [x] **Skill:** `skills/leakhound/SKILL.md` (стандарт Agent Skills, английский, «отвечай на языке пользователя»), ставится командой `leakhound install-skill` (`.claude/skills/` в проекте, `--user` → `~/.claude/skills/`, `--cursor` → `.cursor/rules/leakhound.mdc`). Тест сверяет, что skill ссылается только на существующие инструменты и ruleId.
+- [x] **Skill:** `skills/leakhound/SKILL.md` (стандарт Agent Skills, английский, «отвечай на языке пользователя»), ставится командой `leakhound install-skill` (`.claude/skills/` в проекте, `--user` → `~/.claude/skills/`, `--cursor` → `.cursor/skills/leakhound/`). Тест сверяет, что skill ссылается только на существующие инструменты и ruleId.
+- [x] **Слэш-команда `/leakhound [history|staged|hook|fix]`** (2026-10-03) — тот же skill, без отдельных `.claude/commands` / `.cursor/commands` (в Claude Code skill — это и есть команда; Cursor 2.4+ запускает skills как `/имя` и читает `.claude/skills/`, а `.cursor/commands` переводит в skills). Подкоманда — первое слово после `/leakhound` (Claude Code ещё дописывает `ARGUMENTS: …`); как Cursor передаёт аргументы, в документации нет — проверить вручную. Таблица команд в SKILL.md, инструкции — в `reference/<команда>.md`. Автозапуск по description сохранён (`disable-model-invocation` не ставить).
+  - `allowed-tools` — **только** `mcp__leakhound__scan_project`, `mcp__leakhound__scan_staged`, `mcp__leakhound__scan_history` (формат `mcp__<сервер>__<инструмент>`, сервер — имя из `claude mcp add`). **Никаких `Bash(npx leakhound *)`**: префикс пропустил бы `install-hook` и любую версию из npm. Тест проверяет точный список.
 - [ ] Проверить с настоящими клиентами (Claude Code, Cursor, Claude Desktop) после публикации в npm.
 ### Фаза 1 — довести CLI (готово)
 - [x] Корневой `.gitignore` (node_modules, .env*, но `!test-project/.env.local` — это фикстура).

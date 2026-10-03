@@ -126,12 +126,31 @@ server-only env variables, tell you to rotate leaked keys, write RLS migrations)
 to bypass the pre-commit hook:
 
 ```bash
-npx leakhound install-skill            # .claude/skills/ in this project (Claude Code, Agent Skills)
+npx leakhound install-skill            # .claude/skills/ in this project (Claude Code; Cursor reads it too)
 npx leakhound install-skill --user     # ~/.claude/skills/ for all your projects
-npx leakhound install-skill --cursor   # .cursor/rules/leakhound.mdc for Cursor
+npx leakhound install-skill --cursor   # .cursor/skills/ for Cursor (2.4+)
 ```
 
 The skill works with or without the MCP server: without it, the assistant runs the CLI.
+
+### The /leakhound command
+
+The same skill is also a slash command in Claude Code and Cursor. The assistant still
+runs it on its own before commits and after keys or migrations; type it when you want
+to ask yourself:
+
+| Command | What it does |
+|---|---|
+| `/leakhound` | Scan the project and explain the findings in plain words |
+| `/leakhound history` | The same, plus the whole git history: keys deleted from files but left in old commits |
+| `/leakhound staged` | Check only what goes into the next commit |
+| `/leakhound hook` | Install the pre-commit hook — asks you first |
+| `/leakhound fix` | Fix critical findings one by one, asking before every change; ends with the list of keys you need to rotate |
+
+The scans run without permission prompts only through the MCP server: the skill pre-approves
+just its three read-only tools (`mcp__leakhound__scan_project`, `…scan_staged`, `…scan_history`),
+which works when the server is added under the name `leakhound`. Everything else — CLI commands,
+installing the hook, editing files — asks you as usual.
 
 ## What it checks
 

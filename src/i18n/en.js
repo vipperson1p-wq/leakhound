@@ -177,6 +177,12 @@ export default {
     skillLegacyRemoved: 'Removed the old skill from before the rename to LeakHound: {path}',
     skillExplain: 'Claude Code (and other tools that support Agent Skills) will now run the scanner before commits, after adding keys or env variables and after writing SQL migrations.',
     skillExplainCursor: 'Cursor will now run the scanner before commits, after adding keys or env variables and after writing SQL migrations.',
+    skillCommands: `Or ask for it yourself in the chat:
+  /leakhound           scan the project and explain the findings
+  /leakhound history   the same, plus the whole git history
+  /leakhound staged    only what goes into the next commit
+  /leakhound hook      install the pre-commit hook (asks first)
+  /leakhound fix       fix critical findings one by one, then list the keys to rotate`,
     help: `leakhound {version} — security scanner for vibe-coded Next.js / Vite + Supabase apps.
 Finds leaked API keys, secrets in public env variables, .env files in git and tables without RLS — before you deploy.
 
@@ -185,8 +191,8 @@ Usage:
   leakhound --staged               Scan only files staged for the next commit
   leakhound --history              Also scan the whole git history for removed keys
   leakhound install-hook [path]    Install a pre-commit hook (blocks critical/high)
-  leakhound install-skill [path]   Install the skill for AI assistants
-                                   (--user: ~/.claude/skills, --cursor: Cursor rules)
+  leakhound install-skill [path]   Install the skill and /leakhound command for AI assistants
+                                   (--user: ~/.claude/skills, --cursor: .cursor/skills)
   leakhound mcp                    Start the MCP server (stdio) for AI assistants
 
 Options:

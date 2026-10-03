@@ -116,12 +116,31 @@ Claude Desktop работает не внутри проекта, поэтому
 с RLS) и никогда не обходить pre-commit хук:
 
 ```bash
-npx leakhound install-skill            # .claude/skills/ в этом проекте (Claude Code, Agent Skills)
+npx leakhound install-skill            # .claude/skills/ в этом проекте (Claude Code; Cursor тоже его читает)
 npx leakhound install-skill --user     # ~/.claude/skills/ для всех твоих проектов
-npx leakhound install-skill --cursor   # .cursor/rules/leakhound.mdc для Cursor
+npx leakhound install-skill --cursor   # .cursor/skills/ для Cursor (2.4+)
 ```
 
 Skill работает и без MCP-сервера: тогда ассистент запускает CLI.
+
+### Команда /leakhound
+
+Тот же skill — ещё и слэш-команда в Claude Code и Cursor. Ассистент по-прежнему сам
+запускает его перед коммитом и после ключей или миграций; набери команду, когда хочешь
+попросить сам:
+
+| Команда | Что делает |
+|---|---|
+| `/leakhound` | Проверить проект и объяснить находки простыми словами |
+| `/leakhound history` | То же плюс вся история git: ключи, удалённые из файлов, но оставшиеся в старых коммитах |
+| `/leakhound staged` | Проверить только то, что уйдёт в коммит |
+| `/leakhound hook` | Поставить pre-commit хук — сначала спросит |
+| `/leakhound fix` | Исправить critical-находки по одной, спрашивая перед каждым изменением; в конце — список ключей, которые нужно перевыпустить |
+
+Без запросов разрешения проверки идут только через MCP-сервер: skill заранее разрешает лишь
+три своих инструмента, которые только читают (`mcp__leakhound__scan_project`, `…scan_staged`, `…scan_history`),
+и это работает, если сервер добавлен под именем `leakhound`. Всё остальное — команды CLI,
+установка хука, правка файлов — спрашивает как обычно.
 
 ## Что проверяется
 
@@ -192,7 +211,7 @@ npm run scan:self      # самопроверка сканером
     src/i18n/          — тексты на английском и русском
     src/api.js         — программный API: scan()
     src/mcp.js         — MCP-сервер (stdio, без зависимостей)
-    src/skill.js       — install-skill; сам skill — в skills/leakhound/SKILL.md
+    src/skill.js       — install-skill; сам skill — в skills/leakhound/ (SKILL.md + reference/)
     src/scan.js        — движок: собирает файлы и применяет правила
     src/detectors/     — отдельные детекторы (history.js — история git)
     src/ignore.js      — исключения (--exclude, .leakhoundignore)

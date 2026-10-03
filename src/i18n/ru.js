@@ -177,6 +177,12 @@ export default {
     skillLegacyRemoved: 'Удалён старый skill (до переименования в LeakHound): {path}',
     skillExplain: 'Теперь Claude Code (и другие инструменты с поддержкой Agent Skills) будет запускать сканер перед коммитом, после добавления ключей или переменных окружения и после SQL-миграций.',
     skillExplainCursor: 'Теперь Cursor будет запускать сканер перед коммитом, после добавления ключей или переменных окружения и после SQL-миграций.',
+    skillCommands: `Или вызови сам в чате:
+  /leakhound           проверить проект и объяснить находки
+  /leakhound history   то же плюс вся история git
+  /leakhound staged    только то, что уйдёт в коммит
+  /leakhound hook      поставить pre-commit хук (сначала спросит)
+  /leakhound fix       исправить critical-находки по одной, в конце — ключи на перевыпуск`,
     help: `leakhound {version} — сканер безопасности для вайбкод-проектов на Next.js / Vite + Supabase.
 Находит утёкшие API-ключи, секреты в публичных переменных окружения, .env в git и таблицы без RLS — до деплоя.
 
@@ -185,8 +191,8 @@ export default {
   leakhound --staged               Проверить только файлы, добавленные в коммит
   leakhound --history              Ещё и всю историю git — ключи, удалённые из файлов
   leakhound install-hook [путь]    Поставить pre-commit хук (блокирует critical/high)
-  leakhound install-skill [путь]   Поставить skill для AI-ассистентов
-                                   (--user: ~/.claude/skills, --cursor: правила Cursor)
+  leakhound install-skill [путь]   Поставить skill и команду /leakhound для AI-ассистентов
+                                   (--user: ~/.claude/skills, --cursor: .cursor/skills)
   leakhound mcp                    Запустить MCP-сервер (stdio) для AI-ассистентов
 
 Флаги:
