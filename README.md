@@ -21,8 +21,8 @@ Keys are **always masked** in the output (`sk-pro…****`).
 Requires Node.js 18+. No dependencies.
 
 ```bash
-git clone https://github.com/vipperson1p-wq/vibe-scanner.git
-cd vibe-scanner
+git clone https://github.com/vipperson1p-wq/vibecode-scanner.git
+cd vibecode-scanner
 node src/index.js /path/to/your/project
 ```
 

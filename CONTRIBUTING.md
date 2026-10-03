@@ -20,8 +20,8 @@ Thanks for helping make vibe-coded apps safer! The most valuable contributions a
 Node.js 18+, nothing to install:
 
 ```bash
-git clone https://github.com/vipperson1p-wq/vibe-scanner.git
-cd vibe-scanner
+git clone https://github.com/vipperson1p-wq/vibecode-scanner.git
+cd vibecode-scanner
 npm test               # unit tests (node:test)
 npm run scan:self      # the scanner must pass on its own code
 npm run scan:fixture   # demo run on the intentionally vulnerable test-project/

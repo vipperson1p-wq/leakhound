@@ -9,7 +9,7 @@ Thank you for reporting them responsibly.
 
 Report privately through GitHub:
 **Security** tab → **Report a vulnerability**
-([direct link](https://github.com/vipperson1p-wq/vibe-scanner/security/advisories/new)).
+([direct link](https://github.com/vipperson1p-wq/vibecode-scanner/security/advisories/new)).
 
 Please include:
 

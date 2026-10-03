@@ -19,8 +19,8 @@
 Нужен Node.js 18+. Зависимостей нет.
 
 ```bash
-git clone https://github.com/vipperson1p-wq/vibe-scanner.git
-cd vibe-scanner
+git clone https://github.com/vipperson1p-wq/vibecode-scanner.git
+cd vibecode-scanner
 node src/index.js /путь/к/твоему/проекту
 ```
 
