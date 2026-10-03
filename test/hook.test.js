@@ -10,7 +10,7 @@ const KEY = ['sk-', 'proj-', 'Z9y8X7w6V5u4T3s2R1q0P9o8'].join('');
 const GIT_ID = ['-c', 'user.name=t', '-c', 'user.email=t@t'];
 
 function repo() {
-  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'vibescan-hook-'));
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'leakhound-hook-'));
   execFileSync('git', ['init', '-q'], { cwd: dir });
   fs.writeFileSync(path.join(dir, '.gitignore'), '.env*\n');
   return dir;
@@ -51,13 +51,13 @@ describe('install-hook', () => {
   test('installed from npm: hook uses npx with a pinned version, no absolute path', () => {
     const dir = repo();
     const pkg = JSON.parse(fs.readFileSync('package.json', 'utf8'));
-    const cliPath = path.join(os.tmpdir(), '_npx', 'abc', 'node_modules', 'vibecode-scanner', 'src', 'index.js');
+    const cliPath = path.join(os.tmpdir(), '_npx', 'abc', 'node_modules', 'leakhound', 'src', 'index.js');
     const { runner } = installHook(dir, { cliPath });
     const script = fs.readFileSync(hookFile(dir), 'utf8');
-    assert.ok(script.includes(`NPX_PACKAGE="vibecode-scanner@${pkg.version}"`));
+    assert.ok(script.includes(`NPX_PACKAGE="leakhound@${pkg.version}"`));
     assert.ok(script.includes('SOURCE=""'));
     assert.ok(!script.includes(cliPath.replace(/\\/g, '/')));
-    assert.equal(runner, `npx vibecode-scanner@${pkg.version}`);
+    assert.equal(runner, `npx leakhound@${pkg.version}`);
   });
 
   test('installed from source: hook falls back to the source path, never to npx', () => {
@@ -71,7 +71,7 @@ describe('install-hook', () => {
   test('locally installed package in node_modules/.bin is preferred', () => {
     const dir = repo();
     installHook(dir, { cliPath: path.join(dir, 'no-such-scanner.js') });
-    const bin = path.join(dir, 'node_modules', '.bin', 'vibe-scanner');
+    const bin = path.join(dir, 'node_modules', '.bin', 'leakhound');
     fs.mkdirSync(path.dirname(bin), { recursive: true });
     fs.writeFileSync(bin, '#!/bin/sh\necho "local-bin-called $1"\nexit 1\n', { mode: 0o755 });
     fs.writeFileSync(path.join(dir, '.gitignore'), 'node_modules\n.env*\n');
@@ -104,8 +104,18 @@ describe('install-hook', () => {
     assert.ok(fs.readFileSync(hookFile(dir), 'utf8').includes(HOOK_MARKER));
   });
 
+  test('a hook from before the rename (vibe-scanner) is replaced without --force or backup', () => {
+    const dir = repo();
+    fs.writeFileSync(hookFile(dir), '#!/bin/sh\n# vibe-scanner pre-commit hook\nnpx --yes vibecode-scanner@0.1.1 --staged\n');
+    const { backupPath } = installHook(dir);
+    assert.equal(backupPath, undefined);
+    const script = fs.readFileSync(hookFile(dir), 'utf8');
+    assert.ok(script.includes(HOOK_MARKER));
+    assert.ok(!script.includes('vibecode-scanner'));
+  });
+
   test('throws outside git repository', () => {
-    const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'vibescan-'));
+    const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'leakhound-'));
     assert.throws(() => installHook(dir), /git init/);
   });
 });

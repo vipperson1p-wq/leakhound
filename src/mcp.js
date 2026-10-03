@@ -1,4 +1,4 @@
-// Local MCP server over stdio: `vibe-scanner mcp` (or `npx -y vibecode-scanner mcp`).
+// Local MCP server over stdio: `leakhound mcp` (or `npx -y leakhound mcp`).
 //
 // - No dependencies: a small JSON-RPC loop instead of the SDK — less third-party code
 //   in a security tool, and the package stays dependency-free.
@@ -23,7 +23,7 @@ const ERR = { parse: -32700, invalidRequest: -32600, methodNotFound: -32601, inv
 const MAX_FINDINGS = 50;
 
 const SERVER_INFO = {
-  name: 'vibecode-scanner',
+  name: 'leakhound',
   version: JSON.parse(fs.readFileSync(fileURLToPath(new URL('../package.json', import.meta.url)), 'utf8')).version,
 };
 
@@ -130,7 +130,7 @@ async function callTool(params, ctx) {
     const raw = await scanRaw(target, { exclude: args.exclude ?? [], ...TOOLS[name] });
     return { content: [{ type: 'text', text: formatResult(raw, lang, target) }], isError: false };
   } catch (e) {
-    return toolError(e instanceof ScanError ? t(`errors.${e.key}`, e.params) : `vibe-scanner: ${e.message}`);
+    return toolError(e instanceof ScanError ? t(`errors.${e.key}`, e.params) : `leakhound: ${e.message}`);
   }
 }
 

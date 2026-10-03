@@ -1,4 +1,4 @@
-# 🔍 Vibe Scanner
+# 🔍 LeakHound
 
 [English](README.md) · **Русский**
 
@@ -19,38 +19,38 @@
 Нужен Node.js 18+. Зависимостей нет. Запусти в папке своего проекта:
 
 ```bash
-npx vibecode-scanner .
+npx leakhound .
 ```
 
 Чтобы коммиты с ключами блокировались, добавь сканер в проект и поставь pre-commit хук:
 
 ```bash
-npm install -D vibecode-scanner
-npx vibecode-scanner install-hook
+npm install -D leakhound
+npx leakhound install-hook
 ```
 
-Пакет называется `vibecode-scanner`, а команда, которую он ставит, — `vibe-scanner`.
+Раньше LeakHound публиковался как `vibecode-scanner`. Тот пакет устарел — ставь `leakhound`.
 
 ## Запуск
 
 ```bash
-vibe-scanner <путь>                      # проверить проект
-vibe-scanner <путь> --json               # вывод для программ (AI-слой, сайт)
-vibe-scanner <путь> --history            # плюс ключи, удалённые из файлов, но оставшиеся в истории git
-vibe-scanner <путь> --exclude fixtures/  # пропустить путь (флаг можно повторять)
-vibe-scanner --staged                    # только файлы из git add (то, что уйдёт в коммит)
-vibe-scanner install-hook [путь]         # pre-commit хук: блокирует коммит при критичных проблемах
-vibe-scanner <путь> --lang ru            # язык отчёта: en (по умолчанию) или ru
+leakhound <путь>                      # проверить проект
+leakhound <путь> --json               # вывод для программ (AI-слой, сайт)
+leakhound <путь> --history            # плюс ключи, удалённые из файлов, но оставшиеся в истории git
+leakhound <путь> --exclude fixtures/  # пропустить путь (флаг можно повторять)
+leakhound --staged                    # только файлы из git add (то, что уйдёт в коммит)
+leakhound install-hook [путь]         # pre-commit хук: блокирует коммит при критичных проблемах
+leakhound <путь> --lang ru            # язык отчёта: en (по умолчанию) или ru
 ```
 
-Без установки — `npx vibecode-scanner` вместо `vibe-scanner`.
+Без установки — `npx leakhound` вместо `leakhound`.
 
 Язык отчёта — английский по умолчанию, русский — через `--lang ru` или автоматически, если язык системы русский.
-Порядок: `--lang` → `VIBESCAN_LANG` → `LC_ALL` / `LC_MESSAGES` / `LANG` → язык системы → английский.
+Порядок: `--lang` → `LEAKHOUND_LANG` → `LC_ALL` / `LC_MESSAGES` / `LANG` → язык системы → английский.
 `install-hook --lang ru` — сообщения хука и отчёт при коммите на русском.
 
 Хук запускает сканер из `node_modules/.bin`, если пакет установлен в проект, иначе — через
-`npx vibecode-scanner@<версия>` (версия закреплена: та, что ставила хук; новую сам не скачивает).
+`npx leakhound@<версия>` (версия закреплена: та, что ставила хук; новую сам не скачивает).
 
 Код выхода: `1` — есть критичные или высокие находки, `0` — нет, `2` — ошибка в аргументах.
 Поэтому сканер можно сразу ставить в CI.
@@ -70,7 +70,7 @@ Claude Code, Cursor или Claude Desktop сами запускают скане
 <summary>Claude Code</summary>
 
 ```bash
-claude mcp add vibe-scanner -- npx -y vibecode-scanner mcp --lang ru
+claude mcp add leakhound -- npx -y leakhound mcp --lang ru
 ```
 
 С `--scope project` настройка попадёт в `.mcp.json` и будет у всей команды.
@@ -84,7 +84,7 @@ claude mcp add vibe-scanner -- npx -y vibecode-scanner mcp --lang ru
 ```json
 {
   "mcpServers": {
-    "vibe-scanner": { "command": "npx", "args": ["-y", "vibecode-scanner", "mcp", "--lang", "ru"] }
+    "leakhound": { "command": "npx", "args": ["-y", "leakhound", "mcp", "--lang", "ru"] }
   }
 }
 ```
@@ -98,27 +98,27 @@ Settings → Developer → Edit Config, добавь в `claude_desktop_config.j
 ```json
 {
   "mcpServers": {
-    "vibe-scanner": { "command": "npx", "args": ["-y", "vibecode-scanner", "mcp", "--lang", "ru"] }
+    "leakhound": { "command": "npx", "args": ["-y", "leakhound", "mcp", "--lang", "ru"] }
   }
 }
 ```
 
-На Windows, если сервер не запускается: `"command": "cmd", "args": ["/c", "npx", "-y", "vibecode-scanner", "mcp", "--lang", "ru"]`.
+На Windows, если сервер не запускается: `"command": "cmd", "args": ["/c", "npx", "-y", "leakhound", "mcp", "--lang", "ru"]`.
 Claude Desktop работает не внутри проекта, поэтому попроси проверить конкретную папку
 (у инструментов есть параметр `path`).
 </details>
 
 `--lang ru` — описания инструментов на русском; язык можно задать и в каждом вызове (`lang`).
-Чтобы закрепить версию, пиши `vibecode-scanner@<версия>` вместо `vibecode-scanner`.
+Чтобы закрепить версию, пиши `leakhound@<версия>` вместо `leakhound`.
 
 **Skill.** Учит ассистента, *когда* запускать сканер и *как* исправлять находки (перенести ключи
 в серверные переменные окружения, сказать тебе перевыпустить утёкший ключ, написать миграцию
 с RLS) и никогда не обходить pre-commit хук:
 
 ```bash
-npx vibecode-scanner install-skill            # .claude/skills/ в этом проекте (Claude Code, Agent Skills)
-npx vibecode-scanner install-skill --user     # ~/.claude/skills/ для всех твоих проектов
-npx vibecode-scanner install-skill --cursor   # .cursor/rules/vibe-scanner.mdc для Cursor
+npx leakhound install-skill            # .claude/skills/ в этом проекте (Claude Code, Agent Skills)
+npx leakhound install-skill --user     # ~/.claude/skills/ для всех твоих проектов
+npx leakhound install-skill --cursor   # .cursor/rules/leakhound.mdc для Cursor
 ```
 
 Skill работает и без MCP-сервера: тогда ассистент запускает CLI.
@@ -156,7 +156,7 @@ Skill работает и без MCP-сервера: тогда ассистен
 
 ## Исключения
 
-Файл `.vibescanignore` в корне проекта (синтаксис — упрощённый `.gitignore`):
+Файл `.leakhoundignore` в корне проекта (синтаксис — упрощённый `.gitignore`):
 
 ```
 # комментарий
@@ -178,8 +178,8 @@ test-project/      # папка на любой глубине
 Из исходников:
 
 ```bash
-git clone https://github.com/vipperson1p-wq/vibecode-scanner.git
-cd vibecode-scanner
+git clone https://github.com/vipperson1p-wq/leakhound.git
+cd leakhound
 node src/index.js /путь/к/проекту
 npm test               # тесты (node:test)
 npm run scan:fixture   # прогон на намеренно «дырявом» test-project/
@@ -192,10 +192,10 @@ npm run scan:self      # самопроверка сканером
     src/i18n/          — тексты на английском и русском
     src/api.js         — программный API: scan()
     src/mcp.js         — MCP-сервер (stdio, без зависимостей)
-    src/skill.js       — install-skill; сам skill — в skills/vibe-scanner/SKILL.md
+    src/skill.js       — install-skill; сам skill — в skills/leakhound/SKILL.md
     src/scan.js        — движок: собирает файлы и применяет правила
     src/detectors/     — отдельные детекторы (history.js — история git)
-    src/ignore.js      — исключения (--exclude, .vibescanignore)
+    src/ignore.js      — исключения (--exclude, .leakhoundignore)
     src/hook.js        — pre-commit хук
     src/report.js      — вывод в терминал
     src/index.js       — CLI
@@ -206,7 +206,7 @@ npm run scan:self      # самопроверка сканером
 
 ## Поддержать проект
 
-Vibe Scanner бесплатный и open source, без подписок. Если он спас тебя от утечки
+LeakHound бесплатный и open source, без подписок. Если он спас тебя от утечки
 ключа, можно поддержать разработку:
 
 <!-- TODO: ссылка на донаты -->

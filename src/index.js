@@ -1,10 +1,10 @@
 #!/usr/bin/env node
-// Usage: vibe-scanner <path> [--json] [--staged | --history] [--exclude <pattern>]... [--lang en|ru]
-//        vibe-scanner install-hook [path] [--force] [--lang en|ru]
-//        vibe-scanner install-skill [path] [--user | --cursor] [--force]
-//        vibe-scanner mcp [--lang en|ru]          (MCP server over stdio)
-//        vibe-scanner --help | --version
-// Language: --lang → VIBESCAN_LANG → LC_ALL / LC_MESSAGES / LANG → system locale → English.
+// Usage: leakhound <path> [--json] [--staged | --history] [--exclude <pattern>]... [--lang en|ru]
+//        leakhound install-hook [path] [--force] [--lang en|ru]
+//        leakhound install-skill [path] [--user | --cursor] [--force]
+//        leakhound mcp [--lang en|ru]          (MCP server over stdio)
+//        leakhound --help | --version
+// Language: --lang → LEAKHOUND_LANG → LC_ALL / LC_MESSAGES / LANG → system locale → English.
 import fs from 'node:fs';
 import { printReport } from './report.js';
 import { installHook } from './hook.js';
@@ -37,7 +37,7 @@ function fail(e) {
 }
 if (langError) fail(langError);
 
-// --help / --version win over any command, so `vibe-scanner mcp --help` does not start the server
+// --help / --version win over any command, so `leakhound mcp --help` does not start the server
 const VERSION = JSON.parse(fs.readFileSync(new URL('../package.json', import.meta.url), 'utf8')).version;
 if (argv.some((a) => a === '--help' || a === '-h')) {
   console.log(t('cli.help', { version: VERSION }));
@@ -87,8 +87,9 @@ if (argv[0] === 'install-skill') {
   const target = rest.find((a, i) => !a.startsWith('--') && rest[i - 1] !== '--lang') || '.';
   try {
     const { installSkill } = await import('./skill.js');
-    const { file, overwritten } = installSkill({ where, root: target, force: rest.includes('--force') });
+    const { file, overwritten, removedLegacy } = installSkill({ where, root: target, force: rest.includes('--force') });
     console.log(t(overwritten ? 'cli.skillUpdated' : 'cli.skillInstalled', { path: file }));
+    if (removedLegacy) console.log(t('cli.skillLegacyRemoved', { path: removedLegacy }));
     console.log(t(where === 'cursor' ? 'cli.skillExplainCursor' : 'cli.skillExplain'));
     process.exit(0);
   } catch (e) {

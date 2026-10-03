@@ -20,7 +20,7 @@ const PLACEHOLDER = /\{\w+\}/;
 // Env without any locale hints, so tests do not depend on the machine
 const cleanEnv = (extra = {}) => {
   const env = { ...process.env };
-  for (const k of ['VIBESCAN_LANG', 'LC_ALL', 'LC_MESSAGES', 'LANG']) delete env[k];
+  for (const k of ['LEAKHOUND_LANG', 'LC_ALL', 'LC_MESSAGES', 'LANG']) delete env[k];
   return { ...env, ...extra };
 };
 const cli = (args, env) => spawnSync(process.execPath, [CLI, ...args], { encoding: 'utf8', env: cleanEnv(env) });
@@ -129,7 +129,7 @@ describe('language detection', () => {
   const cases = [
     [{ flag: 'ru', env: {} }, 'ru'],
     [{ flag: 'en', env: { LANG: 'ru_RU.UTF-8' } }, 'en'],
-    [{ env: { VIBESCAN_LANG: 'ru', LANG: 'en_US.UTF-8' } }, 'ru'],
+    [{ env: { LEAKHOUND_LANG: 'ru', LANG: 'en_US.UTF-8' } }, 'ru'],
     [{ env: { LANG: 'ru_RU.UTF-8' } }, 'ru'],
     [{ env: { LC_ALL: 'ru_RU.UTF-8', LANG: 'en_US.UTF-8' } }, 'ru'],
     [{ env: { LANG: 'de_DE.UTF-8' }, systemLocale: 'ru-RU' }, 'en'],
@@ -194,7 +194,7 @@ describe('CLI languages', () => {
 describe('hook languages', () => {
   const KEY = ['sk-', 'proj-', 'Z9y8X7w6V5u4T3s2R1q0P9o8'].join('');
   const repo = () => {
-    const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'vibescan-i18n-'));
+    const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'leakhound-i18n-'));
     execFileSync('git', ['init', '-q'], { cwd: dir });
     fs.writeFileSync(path.join(dir, '.gitignore'), '.env*\n');
     return dir;

@@ -1,13 +1,15 @@
 // Установка pre-commit хука: перед каждым коммитом запускается
-// `vibe-scanner --staged`, при critical/high коммит блокируется.
+// `leakhound --staged`, при critical/high коммит блокируется.
 import { execFileSync } from 'node:child_process';
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { createT, ScanError, DEFAULT_LANG } from './i18n/index.js';
 
-export const HOOK_MARKER = '# vibe-scanner pre-commit hook';
-export const PACKAGE_NAME = 'vibecode-scanner';
+export const HOOK_MARKER = '# leakhound pre-commit hook';
+// Hooks installed before the rename (vibecode-scanner) are ours too: replaced without --force or backup
+const LEGACY_HOOK_MARKERS = ['# vibe-scanner pre-commit hook'];
+export const PACKAGE_NAME = 'leakhound';
 const CLI_PATH = fileURLToPath(new URL('./index.js', import.meta.url));
 const PACKAGE_VERSION = JSON.parse(
   fs.readFileSync(fileURLToPath(new URL('../package.json', import.meta.url)), 'utf8'),
@@ -44,8 +46,8 @@ ${HOOK_MARKER}
 SOURCE="${sourcePath}"
 NPX_PACKAGE="${source ? '' : `${PACKAGE_NAME}@${PACKAGE_VERSION}`}"
 
-if [ -x "./node_modules/.bin/vibe-scanner" ]; then
-  ./node_modules/.bin/vibe-scanner ${args}
+if [ -x "./node_modules/.bin/leakhound" ]; then
+  ./node_modules/.bin/leakhound ${args}
 elif [ -n "$SOURCE" ] && [ -f "$SOURCE" ]; then
   node "$SOURCE" ${args}
 elif [ -n "$NPX_PACKAGE" ] && command -v npx >/dev/null 2>&1; then
@@ -90,7 +92,7 @@ export function installHook(root, { force = false, cliPath = CLI_PATH, source, l
   let backupPath;
   if (fs.existsSync(hookPath)) {
     const existing = fs.readFileSync(hookPath, 'utf8');
-    if (!existing.includes(HOOK_MARKER)) {
+    if (![HOOK_MARKER, ...LEGACY_HOOK_MARKERS].some((m) => existing.includes(m))) {
       if (!force) {
         throw new ScanError('hookExists', { path: hookPath });
       }

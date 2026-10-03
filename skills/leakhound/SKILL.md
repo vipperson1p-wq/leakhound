@@ -1,11 +1,11 @@
 ---
-name: vibe-scanner
-description: Security check for Next.js / Vite + Supabase projects with vibecode-scanner. Use before every git commit, after adding or changing API keys, tokens, .env files or environment variables, after writing SQL migrations or Supabase RLS policies, before making a repository public or deploying, and when the user asks whether their project is secure. Explains findings in plain language and fixes them.
+name: leakhound
+description: Security check for Next.js / Vite + Supabase projects with leakhound. Use before every git commit, after adding or changing API keys, tokens, .env files or environment variables, after writing SQL migrations or Supabase RLS policies, before making a repository public or deploying, and when the user asks whether their project is secure. Explains findings in plain language and fixes them.
 ---
 
-<!-- vibe-scanner skill (installed by: vibe-scanner install-skill) -->
+<!-- leakhound skill (installed by: leakhound install-skill) -->
 
-# Vibe Scanner: check and fix security problems
+# LeakHound: check and fix security problems
 
 The user builds an app with AI help and may not know security well. Your job:
 run the scanner at the right moments, explain what it found in plain words,
@@ -24,13 +24,13 @@ and fix what you can. **Reply in the user's language** and pass the matching
 
 ## How to run
 
-Prefer the MCP tools `scan_project`, `scan_staged`, `scan_history` (server `vibe-scanner`)
+Prefer the MCP tools `scan_project`, `scan_staged`, `scan_history` (server `leakhound`)
 when they are available. Otherwise use the CLI from the project root:
 
 ```bash
-npx vibecode-scanner . --json --lang en          # whole project
-npx vibecode-scanner --staged --json --lang en   # files staged for the commit
-npx vibecode-scanner . --history --json --lang en
+npx leakhound . --json --lang en          # whole project
+npx leakhound --staged --json --lang en   # files staged for the commit
+npx leakhound . --history --json --lang en
 ```
 
 Exit code `1` means critical or high findings. Do not commit while there are any.
@@ -44,7 +44,7 @@ Exit code `1` means critical or high findings. Do not commit while there are any
   real key values, never ask the user to paste a key into the chat, and do not
   open `.env` files just to show their contents.
 - Never bypass the pre-commit hook (`git commit --no-verify`), add paths to
-  `.vibescanignore`, or delete code just to silence a warning — unless the user
+  `.leakhoundignore`, or delete code just to silence a warning — unless the user
   explicitly agrees that the finding is a false positive.
 - Never rewrite git history, force-push, run `supabase db reset`, or change a
   remote database without the user's explicit OK.

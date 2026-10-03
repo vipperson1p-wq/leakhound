@@ -6,7 +6,7 @@ import {
   envFileRule, gitignoreRule, rlsMissingRule, rlsUnverifiedRule, permissivePolicyRule, SEVERITY_ORDER, KNOWN_EXAMPLE_KEYS,
   NOT_CHECKED,
 } from './rules.js';
-import { IGNORE_FILE, parseIgnoreFile, compileIgnore } from './ignore.js';
+import { readIgnoreFiles, compileIgnore } from './ignore.js';
 import { ScanError } from './i18n/index.js';
 
 const IGNORED_DIRS = new Set([
@@ -321,7 +321,7 @@ function readStaged(root, rel) {
   }
 }
 
-// options.exclude — шаблоны из --exclude, дополняют .vibescanignore
+// options.exclude — шаблоны из --exclude, дополняют .leakhoundignore
 // options.staged  — проверять только файлы из индекса (для pre-commit хука)
 export function scanProject(root, { exclude = [], staged = false } = {}) {
   root = path.resolve(root);
@@ -337,8 +337,7 @@ export function scanProject(root, { exclude = [], staged = false } = {}) {
   let scanned = 0;
   let excluded = 0;
 
-  const ignoreText = readText(path.join(root, IGNORE_FILE));
-  const isExcluded = compileIgnore([...(ignoreText ? parseIgnoreFile(ignoreText) : []), ...exclude]);
+  const isExcluded = compileIgnore([...readIgnoreFiles(root, readText), ...exclude]);
   const isSql = (rel) => rel.toLowerCase().endsWith('.sql');
 
   for (const rel of files) {

@@ -41,13 +41,13 @@ function fromLocale(value) {
   return LANGS.includes(code) ? code : DEFAULT_LANG;
 }
 
-// Order: --lang → VIBESCAN_LANG → LC_ALL / LC_MESSAGES / LANG → system locale (Intl) → en
+// Order: --lang → LEAKHOUND_LANG → LC_ALL / LC_MESSAGES / LANG → system locale (Intl) → en
 export function detectLang({ flag, env = process.env, systemLocale } = {}) {
   if (flag) {
     if (!LANGS.includes(flag)) throw new ScanError('unknownLang', { lang: flag });
     return flag;
   }
-  if (env.VIBESCAN_LANG && LANGS.includes(env.VIBESCAN_LANG)) return env.VIBESCAN_LANG;
+  if (env.LEAKHOUND_LANG && LANGS.includes(env.LEAKHOUND_LANG)) return env.LEAKHOUND_LANG;
   for (const name of ['LC_ALL', 'LC_MESSAGES', 'LANG']) {
     const lang = fromLocale(env[name]);
     if (lang) return lang;

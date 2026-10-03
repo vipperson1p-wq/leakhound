@@ -8,7 +8,7 @@ import path from 'node:path';
 import readline from 'node:readline';
 import { secretRules, jwtRegex, serviceRoleRule, KNOWN_EXAMPLE_KEYS, SEVERITY_ORDER } from '../rules.js';
 import { listFiles, shouldSkip, readText, mask, isEnvFile, decodeJwtPayload, makeFinding } from '../scan.js';
-import { IGNORE_FILE, parseIgnoreFile, compileIgnore } from '../ignore.js';
+import { readIgnoreFiles, compileIgnore } from '../ignore.js';
 import { ScanError } from '../i18n/index.js';
 
 // Texts: src/i18n (rules.env-file-in-history, and history.* for keys found in history)
@@ -96,8 +96,7 @@ export async function scanHistory(root, { exclude = [] } = {}) {
   root = path.resolve(root);
   assertGitRepo(root);
 
-  const ignoreText = readText(path.join(root, IGNORE_FILE));
-  const isExcluded = compileIgnore([...(ignoreText ? parseIgnoreFile(ignoreText) : []), ...exclude]);
+  const isExcluded = compileIgnore([...readIgnoreFiles(root, readText), ...exclude]);
   const skip = (rel) => shouldSkip(rel) || isExcluded(rel);
 
   // Secrets still present in current files are reported by the regular scan

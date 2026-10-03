@@ -1,4 +1,4 @@
-// Исключения: флаг --exclude и файл .vibescanignore.
+// Исключения: флаг --exclude и файл .leakhoundignore.
 // Синтаксис — упрощённый .gitignore:
 //   dir/          папка на любой глубине
 //   /dir или a/b  путь от корня проекта
@@ -6,7 +6,17 @@
 //   # комментарий
 // Отрицания (!pattern) не поддерживаются.
 
-export const IGNORE_FILE = '.vibescanignore';
+export const IGNORE_FILE = '.leakhoundignore';
+// Name from before the rename (vibecode-scanner) — still read, so existing exclusions keep working
+export const LEGACY_IGNORE_FILES = ['.vibescanignore'];
+
+// Patterns from every ignore file in the project root; readText(abs) returns null for a missing file
+export function readIgnoreFiles(root, readText) {
+  return [IGNORE_FILE, ...LEGACY_IGNORE_FILES].flatMap((name) => {
+    const text = readText(`${root}/${name}`);
+    return text ? parseIgnoreFile(text) : [];
+  });
+}
 
 export function parseIgnoreFile(text) {
   return text.split(/\r?\n/).map((l) => l.trim()).filter((l) => l && !l.startsWith('#') && !l.startsWith('!'));

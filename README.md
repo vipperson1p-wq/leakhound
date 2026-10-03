@@ -1,4 +1,4 @@
-# 🔍 Vibe Scanner
+# 🔍 LeakHound
 
 **English** · [Русский](README.ru.md)
 
@@ -21,45 +21,45 @@ Reports are in **English** or **Russian** (`--lang ru`, or automatically when yo
 Requires Node.js 18+. No dependencies. Run it in your project folder:
 
 ```bash
-npx vibecode-scanner .
+npx leakhound .
 ```
 
 To block commits that contain keys, add it to the project and install the pre-commit hook:
 
 ```bash
-npm install -D vibecode-scanner
-npx vibecode-scanner install-hook
+npm install -D leakhound
+npx leakhound install-hook
 ```
 
-The package is called `vibecode-scanner`; the command it installs is `vibe-scanner`.
+LeakHound used to be published as `vibecode-scanner`. That package is deprecated — install `leakhound` instead.
 
 ## Usage
 
 ```bash
-vibe-scanner <path>                     # scan a project
-vibe-scanner <path> --json              # machine-readable output
-vibe-scanner <path> --history           # also scan git history for removed keys
-vibe-scanner <path> --exclude fixtures/ # skip paths (repeatable)
-vibe-scanner --staged                   # only files staged for commit
-vibe-scanner install-hook [path]        # pre-commit hook: block commits with critical/high findings
-vibe-scanner <path> --lang ru           # report language: en (default) or ru
+leakhound <path>                     # scan a project
+leakhound <path> --json              # machine-readable output
+leakhound <path> --history           # also scan git history for removed keys
+leakhound <path> --exclude fixtures/ # skip paths (repeatable)
+leakhound --staged                   # only files staged for commit
+leakhound install-hook [path]        # pre-commit hook: block commits with critical/high findings
+leakhound <path> --lang ru           # report language: en (default) or ru
 ```
 
-Without installing, use `npx vibecode-scanner` instead of `vibe-scanner`.
+Without installing, use `npx leakhound` instead of `leakhound`.
 
-Language is picked in this order: `--lang` → `VIBESCAN_LANG` → `LC_ALL` / `LC_MESSAGES` / `LANG` → system locale → English.
+Language is picked in this order: `--lang` → `LEAKHOUND_LANG` → `LC_ALL` / `LC_MESSAGES` / `LANG` → system locale → English.
 `install-hook --lang ru` makes the hook messages and commit-time reports Russian.
 
 ### Programmatic use
 
 ```js
-import { scan } from 'vibecode-scanner';
+import { scan } from 'leakhound';
 const result = await scan('.', { lang: 'en', history: true });
 // result.findings: [{ ruleId, severity, file, line, snippet (masked), title, why, fix, ... }]
 ```
 
 The pre-commit hook runs the scanner from `node_modules/.bin` if the package is installed
-in the project, otherwise via `npx vibecode-scanner@<version>` (pinned to the version that
+in the project, otherwise via `npx leakhound@<version>` (pinned to the version that
 installed the hook — it never pulls a newer release on its own).
 
 Exit code: `1` if there are critical or high findings, `0` otherwise, `2` on usage errors —
@@ -80,7 +80,7 @@ instructions, so a malicious file can't hijack the assistant.
 <summary>Claude Code</summary>
 
 ```bash
-claude mcp add vibe-scanner -- npx -y vibecode-scanner mcp
+claude mcp add leakhound -- npx -y leakhound mcp
 ```
 
 Add `--scope project` to share it with your team via `.mcp.json`.
@@ -94,7 +94,7 @@ Add `--scope project` to share it with your team via `.mcp.json`.
 ```json
 {
   "mcpServers": {
-    "vibe-scanner": { "command": "npx", "args": ["-y", "vibecode-scanner", "mcp"] }
+    "leakhound": { "command": "npx", "args": ["-y", "leakhound", "mcp"] }
   }
 }
 ```
@@ -108,27 +108,27 @@ Settings → Developer → Edit Config, add to `claude_desktop_config.json`, res
 ```json
 {
   "mcpServers": {
-    "vibe-scanner": { "command": "npx", "args": ["-y", "vibecode-scanner", "mcp"] }
+    "leakhound": { "command": "npx", "args": ["-y", "leakhound", "mcp"] }
   }
 }
 ```
 
-On Windows, if the server does not start, use `"command": "cmd", "args": ["/c", "npx", "-y", "vibecode-scanner", "mcp"]`.
+On Windows, if the server does not start, use `"command": "cmd", "args": ["/c", "npx", "-y", "leakhound", "mcp"]`.
 Claude Desktop doesn't run inside your project, so ask it to scan a specific folder
 (the tools take a `path`).
 </details>
 
 Add `--lang ru` to the args for Russian tool descriptions; each tool call can also pass `lang`.
-To pin a version, use `vibecode-scanner@<version>` instead of `vibecode-scanner`.
+To pin a version, use `leakhound@<version>` instead of `leakhound`.
 
 **Skill.** Teaches the assistant *when* to scan and *how* to fix findings (move keys to
 server-only env variables, tell you to rotate leaked keys, write RLS migrations), and never
 to bypass the pre-commit hook:
 
 ```bash
-npx vibecode-scanner install-skill            # .claude/skills/ in this project (Claude Code, Agent Skills)
-npx vibecode-scanner install-skill --user     # ~/.claude/skills/ for all your projects
-npx vibecode-scanner install-skill --cursor   # .cursor/rules/vibe-scanner.mdc for Cursor
+npx leakhound install-skill            # .claude/skills/ in this project (Claude Code, Agent Skills)
+npx leakhound install-skill --user     # ~/.claude/skills/ for all your projects
+npx leakhound install-skill --cursor   # .cursor/rules/leakhound.mdc for Cursor
 ```
 
 The skill works with or without the MCP server: without it, the assistant runs the CLI.
@@ -166,7 +166,7 @@ added by `git add .`, plus gitignored `.env*` files (for public variables only).
 
 ## Exclusions
 
-Create `.vibescanignore` in the project root (simplified `.gitignore` syntax):
+Create `.leakhoundignore` in the project root (simplified `.gitignore` syntax):
 
 ```
 # comment
@@ -190,7 +190,7 @@ Found a vulnerability in the scanner itself? Please report it privately — see 
 
 ## Support the project
 
-Vibe Scanner is free and open source, with no subscriptions. If it saved you
+LeakHound is free and open source, with no subscriptions. If it saved you
 from leaking a key, you can support development:
 
 <!-- TODO: donation link -->
