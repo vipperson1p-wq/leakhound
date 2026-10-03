@@ -1,14 +1,31 @@
 {
   "name": "vibe-scanner",
   "version": "0.1.0",
-  "description": "Сканер безопасности для вайбкод-проектов",
+  "description": "Security scanner for vibe-coded Next.js / Vite + Supabase apps: leaked keys, public env secrets, .env in git, missing RLS",
   "type": "module",
   "bin": { "vibe-scanner": "./src/index.js" },
+  "files": [
+    "src/",
+    "README.md",
+    "README.ru.md",
+    "LICENSE"
+  ],
+  "engines": { "node": ">=18" },
   "scripts": {
     "scan": "node src/index.js",
     "test": "node --test",
     "scan:fixture": "node src/index.js test-project",
     "scan:self": "node src/index.js ."
   },
+  "keywords": [
+    "security", "scanner", "secrets", "supabase", "rls", "nextjs", "vite",
+    "vibe-coding", "pre-commit", "env", "api-keys"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/vipperson1p-wq/vibe-scanner.git"
+  },
+  "bugs": { "url": "https://github.com/vipperson1p-wq/vibe-scanner/issues" },
+  "homepage": "https://github.com/vipperson1p-wq/vibe-scanner#readme",
   "license": "MIT"
 }
