@@ -55,6 +55,74 @@ vibe-scanner <путь> --lang ru            # язык отчёта: en (по �
 Код выхода: `1` — есть критичные или высокие находки, `0` — нет, `2` — ошибка в аргументах.
 Поэтому сканер можно сразу ставить в CI.
 
+## Сканер внутри AI-ассистента (MCP + skill)
+
+Claude Code, Cursor или Claude Desktop сами запускают сканер — перед коммитом, после
+добавления ключей или переменных окружения, после SQL-миграций — объясняют находки
+и исправляют их.
+
+**MCP-сервер.** Работает локально через `npx` по stdio, никуда ничего не отправляет (наших серверов нет).
+Инструменты только для чтения: `scan_project`, `scan_staged`, `scan_history`. Ключи всегда
+замаскированы, файлы целиком не возвращаются, а код из репозитория помечен как данные,
+а не инструкции, — вредоносный файл не сможет «перехватить» ассистента.
+
+<details open>
+<summary>Claude Code</summary>
+
+```bash
+claude mcp add vibe-scanner -- npx -y vibecode-scanner mcp --lang ru
+```
+
+С `--scope project` настройка попадёт в `.mcp.json` и будет у всей команды.
+</details>
+
+<details>
+<summary>Cursor</summary>
+
+`.cursor/mcp.json` в проекте (или `~/.cursor/mcp.json` для всех проектов):
+
+```json
+{
+  "mcpServers": {
+    "vibe-scanner": { "command": "npx", "args": ["-y", "vibecode-scanner", "mcp", "--lang", "ru"] }
+  }
+}
+```
+</details>
+
+<details>
+<summary>Claude Desktop</summary>
+
+Settings → Developer → Edit Config, добавь в `claude_desktop_config.json` и перезапусти Claude Desktop:
+
+```json
+{
+  "mcpServers": {
+    "vibe-scanner": { "command": "npx", "args": ["-y", "vibecode-scanner", "mcp", "--lang", "ru"] }
+  }
+}
+```
+
+На Windows, если сервер не запускается: `"command": "cmd", "args": ["/c", "npx", "-y", "vibecode-scanner", "mcp", "--lang", "ru"]`.
+Claude Desktop работает не внутри проекта, поэтому попроси проверить конкретную папку
+(у инструментов есть параметр `path`).
+</details>
+
+`--lang ru` — описания инструментов на русском; язык можно задать и в каждом вызове (`lang`).
+Чтобы закрепить версию, пиши `vibecode-scanner@<версия>` вместо `vibecode-scanner`.
+
+**Skill.** Учит ассистента, *когда* запускать сканер и *как* исправлять находки (перенести ключи
+в серверные переменные окружения, сказать тебе перевыпустить утёкший ключ, написать миграцию
+с RLS) и никогда не обходить pre-commit хук:
+
+```bash
+npx vibecode-scanner install-skill            # .claude/skills/ в этом проекте (Claude Code, Agent Skills)
+npx vibecode-scanner install-skill --user     # ~/.claude/skills/ для всех твоих проектов
+npx vibecode-scanner install-skill --cursor   # .cursor/rules/vibe-scanner.mdc для Cursor
+```
+
+Skill работает и без MCP-сервера: тогда ассистент запускает CLI.
+
 ## Что проверяется
 
 | Проверка | Уровень |
@@ -123,6 +191,8 @@ npm run scan:self      # самопроверка сканером
     src/rules.js       — все правила (обнаружение)
     src/i18n/          — тексты на английском и русском
     src/api.js         — программный API: scan()
+    src/mcp.js         — MCP-сервер (stdio, без зависимостей)
+    src/skill.js       — install-skill; сам skill — в skills/vibe-scanner/SKILL.md
     src/scan.js        — движок: собирает файлы и применяет правила
     src/detectors/     — отдельные детекторы (history.js — история git)
     src/ignore.js      — исключения (--exclude, .vibescanignore)

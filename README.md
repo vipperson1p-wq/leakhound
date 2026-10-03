@@ -65,6 +65,74 @@ installed the hook — it never pulls a newer release on its own).
 Exit code: `1` if there are critical or high findings, `0` otherwise, `2` on usage errors —
 so it works in CI as is.
 
+## Use it from your AI assistant (MCP + skill)
+
+Let Claude Code, Cursor or Claude Desktop run the scanner for you — before commits,
+after adding keys or env variables, after writing SQL migrations — and explain and fix
+what it finds.
+
+**MCP server.** Runs locally over stdio via `npx`; nothing is sent to our servers (there are none).
+Tools are read-only: `scan_project`, `scan_staged`, `scan_history`. Secrets are always masked,
+whole files are never returned, and code from your repository is marked as data, not
+instructions, so a malicious file can't hijack the assistant.
+
+<details open>
+<summary>Claude Code</summary>
+
+```bash
+claude mcp add vibe-scanner -- npx -y vibecode-scanner mcp
+```
+
+Add `--scope project` to share it with your team via `.mcp.json`.
+</details>
+
+<details>
+<summary>Cursor</summary>
+
+`.cursor/mcp.json` in the project (or `~/.cursor/mcp.json` for all projects):
+
+```json
+{
+  "mcpServers": {
+    "vibe-scanner": { "command": "npx", "args": ["-y", "vibecode-scanner", "mcp"] }
+  }
+}
+```
+</details>
+
+<details>
+<summary>Claude Desktop</summary>
+
+Settings → Developer → Edit Config, add to `claude_desktop_config.json`, restart Claude Desktop:
+
+```json
+{
+  "mcpServers": {
+    "vibe-scanner": { "command": "npx", "args": ["-y", "vibecode-scanner", "mcp"] }
+  }
+}
+```
+
+On Windows, if the server does not start, use `"command": "cmd", "args": ["/c", "npx", "-y", "vibecode-scanner", "mcp"]`.
+Claude Desktop doesn't run inside your project, so ask it to scan a specific folder
+(the tools take a `path`).
+</details>
+
+Add `--lang ru` to the args for Russian tool descriptions; each tool call can also pass `lang`.
+To pin a version, use `vibecode-scanner@<version>` instead of `vibecode-scanner`.
+
+**Skill.** Teaches the assistant *when* to scan and *how* to fix findings (move keys to
+server-only env variables, tell you to rotate leaked keys, write RLS migrations), and never
+to bypass the pre-commit hook:
+
+```bash
+npx vibecode-scanner install-skill            # .claude/skills/ in this project (Claude Code, Agent Skills)
+npx vibecode-scanner install-skill --user     # ~/.claude/skills/ for all your projects
+npx vibecode-scanner install-skill --cursor   # .cursor/rules/vibe-scanner.mdc for Cursor
+```
+
+The skill works with or without the MCP server: without it, the assistant runs the CLI.
+
 ## What it checks
 
 | Check | Severity |

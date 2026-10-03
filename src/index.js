@@ -1,6 +1,8 @@
 #!/usr/bin/env node
 // Usage: vibe-scanner <path> [--json] [--staged | --history] [--exclude <pattern>]... [--lang en|ru]
 //        vibe-scanner install-hook [path] [--force] [--lang en|ru]
+//        vibe-scanner install-skill [path] [--user | --cursor] [--force]
+//        vibe-scanner mcp [--lang en|ru]          (MCP server over stdio)
 // Language: --lang → VIBESCAN_LANG → LC_ALL / LC_MESSAGES / LANG → system locale → English.
 import { printReport } from './report.js';
 import { installHook } from './hook.js';
@@ -53,6 +55,32 @@ function parseArgs(args) {
     else fail(new ScanError('extraArg', { arg: a }));
   }
   return opts;
+}
+
+// MCP server over stdio — nothing else may be written to stdout
+if (argv[0] === 'mcp') {
+  const unknown = argv.slice(1).find((a, i, rest) => a.startsWith('--') && a !== '--lang' && !a.startsWith('--lang=') && rest[i - 1] !== '--lang');
+  if (unknown) fail(new ScanError('unknownFlag', { flag: unknown }));
+  const { serveStdio } = await import('./mcp.js');
+  await serveStdio({ lang });
+  process.exit(0);
+}
+
+if (argv[0] === 'install-skill') {
+  const rest = argv.slice(1);
+  const where = rest.includes('--user') ? 'user' : rest.includes('--cursor') ? 'cursor' : 'project';
+  const unknown = rest.find((a, i) => a.startsWith('--') && !['--user', '--cursor', '--force', '--lang'].includes(a) && !a.startsWith('--lang=') && rest[i - 1] !== '--lang');
+  if (unknown) fail(new ScanError('unknownFlag', { flag: unknown }));
+  const target = rest.find((a, i) => !a.startsWith('--') && rest[i - 1] !== '--lang') || '.';
+  try {
+    const { installSkill } = await import('./skill.js');
+    const { file, overwritten } = installSkill({ where, root: target, force: rest.includes('--force') });
+    console.log(t(overwritten ? 'cli.skillUpdated' : 'cli.skillInstalled', { path: file }));
+    console.log(t(where === 'cursor' ? 'cli.skillExplainCursor' : 'cli.skillExplain'));
+    process.exit(0);
+  } catch (e) {
+    fail(e);
+  }
 }
 
 if (argv[0] === 'install-hook') {
