@@ -3,7 +3,9 @@
 //        vibe-scanner install-hook [path] [--force] [--lang en|ru]
 //        vibe-scanner install-skill [path] [--user | --cursor] [--force]
 //        vibe-scanner mcp [--lang en|ru]          (MCP server over stdio)
+//        vibe-scanner --help | --version
 // Language: --lang → VIBESCAN_LANG → LC_ALL / LC_MESSAGES / LANG → system locale → English.
+import fs from 'node:fs';
 import { printReport } from './report.js';
 import { installHook } from './hook.js';
 import { scanRaw, hasSeriousFindings } from './api.js';
@@ -34,6 +36,17 @@ function fail(e) {
   process.exit(2);
 }
 if (langError) fail(langError);
+
+// --help / --version win over any command, so `vibe-scanner mcp --help` does not start the server
+const VERSION = JSON.parse(fs.readFileSync(new URL('../package.json', import.meta.url), 'utf8')).version;
+if (argv.some((a) => a === '--help' || a === '-h')) {
+  console.log(t('cli.help', { version: VERSION }));
+  process.exit(0);
+}
+if (argv.some((a) => a === '--version' || a === '-v')) {
+  console.log(VERSION);
+  process.exit(0);
+}
 
 function parseArgs(args) {
   const opts = { target: '.', json: false, staged: false, history: false, exclude: [] };

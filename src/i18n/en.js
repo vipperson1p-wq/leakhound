@@ -176,6 +176,34 @@ export default {
     skillUpdated: '✅ Skill updated: {path}',
     skillExplain: 'Claude Code (and other tools that support Agent Skills) will now run the scanner before commits, after adding keys or env variables and after writing SQL migrations.',
     skillExplainCursor: 'Cursor will now run the scanner before commits, after adding keys or env variables and after writing SQL migrations.',
+    help: `vibecode-scanner {version} — security scanner for vibe-coded Next.js / Vite + Supabase apps.
+Finds leaked API keys, secrets in public env variables, .env files in git and tables without RLS — before you deploy.
+
+Usage:
+  vibe-scanner [path]                 Scan a project (default: current folder)
+  vibe-scanner --staged               Scan only files staged for the next commit
+  vibe-scanner --history              Also scan the whole git history for removed keys
+  vibe-scanner install-hook [path]    Install a pre-commit hook (blocks critical/high)
+  vibe-scanner install-skill [path]   Install the skill for AI assistants
+                                      (--user: ~/.claude/skills, --cursor: Cursor rules)
+  vibe-scanner mcp                    Start the MCP server (stdio) for AI assistants
+
+Options:
+  --json                Output results as JSON
+  --exclude <pattern>   Skip files/folders (repeatable; also .vibescanignore)
+  --lang en|ru          Report language (default: system language)
+  --force               install-hook / install-skill: overwrite an existing file
+  -h, --help            Show this help
+  -v, --version         Show the version
+
+Exit codes: 0 — no critical/high findings, 1 — critical/high found, 2 — usage error.
+
+Examples:
+  npx vibe-scanner .
+  npx vibe-scanner --staged --lang ru
+  npx vibe-scanner . --json --exclude docs/
+
+More: https://github.com/vipperson1p-wq/vibecode-scanner`,
   },
 
   mcp: {

@@ -176,6 +176,34 @@ export default {
     skillUpdated: '✅ Skill обновлён: {path}',
     skillExplain: 'Теперь Claude Code (и другие инструменты с поддержкой Agent Skills) будет запускать сканер перед коммитом, после добавления ключей или переменных окружения и после SQL-миграций.',
     skillExplainCursor: 'Теперь Cursor будет запускать сканер перед коммитом, после добавления ключей или переменных окружения и после SQL-миграций.',
+    help: `vibecode-scanner {version} — сканер безопасности для вайбкод-проектов на Next.js / Vite + Supabase.
+Находит утёкшие API-ключи, секреты в публичных переменных окружения, .env в git и таблицы без RLS — до деплоя.
+
+Использование:
+  vibe-scanner [путь]                 Проверить проект (по умолчанию — текущая папка)
+  vibe-scanner --staged               Проверить только файлы, добавленные в коммит
+  vibe-scanner --history              Ещё и всю историю git — ключи, удалённые из файлов
+  vibe-scanner install-hook [путь]    Поставить pre-commit хук (блокирует critical/high)
+  vibe-scanner install-skill [путь]   Поставить skill для AI-ассистентов
+                                      (--user: ~/.claude/skills, --cursor: правила Cursor)
+  vibe-scanner mcp                    Запустить MCP-сервер (stdio) для AI-ассистентов
+
+Флаги:
+  --json                Вывести результат в JSON
+  --exclude <шаблон>    Пропустить файлы/папки (можно несколько; также .vibescanignore)
+  --lang en|ru          Язык отчёта (по умолчанию — язык системы)
+  --force               install-hook / install-skill: перезаписать существующий файл
+  -h, --help            Показать эту справку
+  -v, --version         Показать версию
+
+Коды выхода: 0 — нет critical/high, 1 — найдены critical/high, 2 — ошибка в аргументах.
+
+Примеры:
+  npx vibe-scanner .
+  npx vibe-scanner --staged --lang ru
+  npx vibe-scanner . --json --exclude docs/
+
+Подробнее: https://github.com/vipperson1p-wq/vibecode-scanner`,
   },
 
   mcp: {

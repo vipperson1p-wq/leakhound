@@ -15,7 +15,7 @@
 - `src/i18n/` — тексты на en/ru и локализация. Движок возвращает языконезависимые находки (`ruleId`, `params`, `variant`, `snippetKey`, ключи заметок), тексты подставляет `localizeResult(result, lang)` при выводе.
 - `src/api.js` — программный API: `scan(path, { lang, history, staged, exclude })` → локализованный результат; `scanRaw` — без текстов. Точка входа пакета (`main`).
 - `src/scan.js` — движок: собирает файлы (через `git ls-files`, если это репозиторий) и применяет правила.
-- `src/report.js` — вывод в терминал. `src/index.js` — CLI (`--json`, `--staged`, `--history`, `--exclude`, `--lang`, `install-hook`).
+- `src/report.js` — вывод в терминал. `src/index.js` — CLI (`--json`, `--staged`, `--history`, `--exclude`, `--lang`, `--help`, `--version`, `install-hook`).
 - `src/ignore.js` — исключения (`.vibescanignore`), `src/hook.js` — pre-commit хук.
 - `src/mcp.js` — MCP-сервер (stdio), `src/skill.js` + `skills/vibe-scanner/SKILL.md` — skill для AI-ассистентов.
 - `src/detectors/history.js` — `--history`: ключи, удалённые из файлов, но оставшиеся в истории git.
