@@ -1,0 +1,59 @@
+name: Bug report
+description: The scanner crashes, hangs, or behaves differently from the docs
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for the report! For a **missed or wrong detection**, use the
+        *False positive* or *Rule request* templates instead.
+        **Security problems in the scanner itself** — please report privately, see SECURITY.md.
+
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened
+      description: What did you run, what did you expect, and what happened instead?
+      placeholder: |
+        Ran `node src/index.js . --history` and got ...
+    validations:
+      required: true
+
+  - type: textarea
+    id: repro
+    attributes:
+      label: Steps to reproduce
+      description: A minimal project or file layout that triggers the bug, if possible.
+    validations:
+      required: true
+
+  - type: textarea
+    id: output
+    attributes:
+      label: Output
+      description: Terminal or `--json` output. Keys in the output are masked — keep them masked.
+      render: text
+
+  - type: input
+    id: version
+    attributes:
+      label: Version / commit
+      placeholder: e.g. 0.1.0 or commit hash
+    validations:
+      required: true
+
+  - type: input
+    id: env
+    attributes:
+      label: Environment
+      placeholder: e.g. Windows 11, Node 24, Git 2.55
+    validations:
+      required: true
+
+  - type: checkboxes
+    id: no-secrets
+    attributes:
+      label: Secrets
+      options:
+        - label: I did not paste any real keys, tokens or passwords (Я не вставлял настоящие ключи)
+          required: true

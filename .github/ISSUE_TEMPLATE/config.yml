@@ -1,0 +1,5 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Report a security vulnerability in the scanner
+    url: https://github.com/vipperson1p-wq/vibe-scanner/security/advisories/new
+    about: Please report vulnerabilities privately, not as a public issue.

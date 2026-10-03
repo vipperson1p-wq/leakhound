@@ -1,0 +1,64 @@
+name: Rule request
+description: Suggest a new key format or Supabase / config check
+labels: [new-rule]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Suggest something the scanner should catch. Rules must be **deterministic**
+        (regex / parsing), so the more precise the format, the better.
+        Want to write it yourself? See CONTRIBUTING.md.
+
+  - type: dropdown
+    id: kind
+    attributes:
+      label: Kind of rule
+      options:
+        - API key / token format
+        - Supabase / SQL migration check
+        - Env variables / config files
+        - Other
+    validations:
+      required: true
+
+  - type: input
+    id: provider
+    attributes:
+      label: Provider or feature
+      placeholder: e.g. Resend API key, Supabase storage bucket policies
+    validations:
+      required: true
+
+  - type: textarea
+    id: format
+    attributes:
+      label: What exactly should be detected
+      description: |
+        For keys: prefix, length, charset — and a **link to the provider's docs**.
+        For SQL/config: an example of the dangerous code (fake values only).
+    validations:
+      required: true
+
+  - type: textarea
+    id: risk
+    attributes:
+      label: Why is it dangerous?
+      description: What can an attacker do with it? This becomes the plain-language explanation in the report.
+    validations:
+      required: true
+
+  - type: textarea
+    id: negative
+    attributes:
+      label: What should NOT be detected
+      description: Similar-looking safe values, public keys, documentation examples, placeholders.
+
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Checklist
+      options:
+        - label: I did not paste any real keys (Я не вставлял настоящие ключи)
+          required: true
+        - label: The format comes from public docs, not from TruffleHog or Semgrep rules (see CONTRIBUTING.md)
+          required: true

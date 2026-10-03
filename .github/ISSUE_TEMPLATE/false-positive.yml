@@ -1,0 +1,52 @@
+name: False positive
+description: The scanner reported something that is not a real problem
+labels: [false-positive]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        False-positive reports are very valuable — thank you!
+
+        ⚠️ **Never paste a real key**, even one you think is harmless.
+        Replace characters so the value keeps its shape, e.g. `sk-proj-AAAA…AAAA` (keep the prefix, replace the rest).
+        (Никогда не вставляй настоящий ключ — замени символы, сохранив формат.)
+
+  - type: input
+    id: rule
+    attributes:
+      label: Rule ID
+      description: The `ruleId` from `--json` output, or the finding title from the report.
+      placeholder: e.g. openai-key, hardcoded-secret, rls-unverified
+    validations:
+      required: true
+
+  - type: textarea
+    id: snippet
+    attributes:
+      label: The flagged code (with fake values)
+      description: The line or SQL statement that was flagged, plus a few lines of context. File path helps too.
+      render: text
+    validations:
+      required: true
+
+  - type: textarea
+    id: why
+    attributes:
+      label: Why is this not a problem?
+      description: E.g. "this is a documentation example", "this key is public by design", "RLS is enabled in another migration".
+    validations:
+      required: true
+
+  - type: input
+    id: version
+    attributes:
+      label: Version / commit
+      placeholder: e.g. 0.1.0 or commit hash
+
+  - type: checkboxes
+    id: no-secrets
+    attributes:
+      label: Secrets
+      options:
+        - label: I replaced all real keys, tokens and passwords with fake values (Я заменил настоящие ключи на фейковые)
+          required: true
