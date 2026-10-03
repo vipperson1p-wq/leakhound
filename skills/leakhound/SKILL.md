@@ -29,7 +29,7 @@ end of this file as `ARGUMENTS: <text>`). Before acting on a subcommand, read it
 | `/leakhound history` | The same, plus the whole git history: keys removed from files but left in old commits | [reference/history.md](reference/history.md) |
 | `/leakhound staged` | Scan only what goes into the next commit | [reference/staged.md](reference/staged.md) |
 | `/leakhound hook` | Install the pre-commit hook — only after the user agrees | [reference/hook.md](reference/hook.md) |
-| `/leakhound fix` | Fix critical findings one by one, asking before every change; end with the keys to rotate | [reference/fix.md](reference/fix.md) |
+| `/leakhound fix` | Fix critical findings one by one, asking before every change; end with the keys to rotate. No critical ones → add RLS for `rls-unverified` tables in a new migration, after asking | [reference/fix.md](reference/fix.md) |
 
 Any other word after `/leakhound`: show this list of commands and run nothing.
 

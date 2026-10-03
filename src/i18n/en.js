@@ -182,7 +182,8 @@ export default {
   /leakhound history   the same, plus the whole git history
   /leakhound staged    only what goes into the next commit
   /leakhound hook      install the pre-commit hook (asks first)
-  /leakhound fix       fix critical findings one by one, then list the keys to rotate`,
+  /leakhound fix       fix critical findings one by one, then list the keys to rotate;
+                       no critical ones → add RLS for unverified tables`,
     help: `leakhound {version} — security scanner for vibe-coded Next.js / Vite + Supabase apps.
 Finds leaked API keys, secrets in public env variables, .env files in git and tables without RLS — before you deploy.
 

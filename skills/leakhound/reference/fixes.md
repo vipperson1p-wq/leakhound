@@ -10,7 +10,7 @@
 | Anything with `source: history`, `env-file-in-history` | Rotation is the fix. Rewriting history (git filter-repo) only after rotation and only with the user's OK. |
 | `rls-not-enabled` | Write a **new** migration: `alter table … enable row level security;` plus policies based on `auth.uid()`. Never edit migrations that were already applied. |
 | `permissive-policy` | Replace `true` with a real condition. For read-only policies, ask whether the data is meant to be public (blog posts) or not (profiles). |
-| `rls-unverified` | The table was created outside migrations. Ask the user to check RLS in Supabase (Table Editor or Security Advisor), or add a migration with `enable row level security` (safe to repeat). |
+| `rls-unverified` | The table was created outside migrations. Ask the user to check RLS in Supabase (Table Editor or Security Advisor), or add a **new** migration with `alter table if exists public.<table> enable row level security;` (safe to repeat). First check the browser does not query the table with the anon key — without policies those queries stop working ([fix.md](fix.md), "Tables without verified RLS"). |
 | `hardcoded-secret`, `stripe-test-key`, `google-api-key` | Check with the user; move real secrets to env variables; restrict Google keys in Google Cloud Console. |
 
 Where to rotate a key — name the place, the user does it themselves:

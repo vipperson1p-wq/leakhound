@@ -145,7 +145,7 @@ to ask yourself:
 | `/leakhound history` | The same, plus the whole git history: keys deleted from files but left in old commits |
 | `/leakhound staged` | Check only what goes into the next commit |
 | `/leakhound hook` | Install the pre-commit hook — asks you first |
-| `/leakhound fix` | Fix critical findings one by one, asking before every change; ends with the list of keys you need to rotate |
+| `/leakhound fix` | Fix critical findings one by one, asking before every change; ends with the list of keys you need to rotate. No critical ones → turns on RLS for tables the scanner couldn't verify, in a new migration, after asking |
 
 The scans run without permission prompts only through the MCP server: the skill pre-approves
 just its three read-only tools (`mcp__leakhound__scan_project`, `…scan_staged`, `…scan_history`),

@@ -84,12 +84,49 @@ describe('SKILL.md', () => {
     assert.match(read('reference/hook.md'), /Ask first\. Install nothing until the user says yes/);
     assert.match(read('reference/hook.md'), /--force` only after a second, explicit yes/);
     const fix = read('reference/fix.md');
-    assert.match(fix, /\*\*critical\*\*/);
+    assert.match(fix, /\*\*Critical\*\* findings/);
     assert.match(fix, /asking\s+before every change/);
     assert.match(fix, /End with the list of keys to rotate/);
     for (const rel of ['reference/scan.md', 'reference/history.md', 'reference/staged.md']) {
       assert.match(read(rel), /Do not change any files/, rel);
     }
+  });
+});
+
+describe('/leakhound fix scope', () => {
+  const fix = read('reference/fix.md');
+  const section = (title) => fix.split(/^#{2,3} /m).find((s) => s.startsWith(title));
+
+  test('handles critical findings, otherwise rls-unverified, and nothing else', () => {
+    const scope = section('What it handles');
+    assert.match(scope, /\*\*Critical\*\* findings/);
+    assert.match(scope, /Otherwise \*\*`rls-unverified`\*\*/);
+    assert.match(scope, /Nothing else/);
+    assert.match(section('Steps'), /Neither → say there is nothing for `\/leakhound fix` to do and stop/);
+  });
+
+  test('rls-unverified: one new migration, if exists, browser check, asks first, does not apply', () => {
+    const rls = section('Tables without verified RLS');
+    for (const s of [
+      'check the code for queries to it',
+      'will\n     block those queries and break the app',
+      '**one new migration**',
+      'never edit a migration that already exists',
+      'alter table if exists public.<table> enable row level security;',
+      'Ask: "Create this migration?" — and wait',
+      'Do not apply it',
+    ]) assert.ok(rls.includes(s), s);
+  });
+
+  test('the skill offers /leakhound fix only together with what it handles', () => {
+    for (const rel of files.filter((f) => f.endsWith('.md') && !['SKILL.md', 'reference/fix.md'].includes(f))) {
+      const text = read(rel);
+      if (!text.includes('/leakhound fix')) continue;
+      assert.match(text, /\(\[fix\.md\]\(fix\.md\), "What it handles"\)/, `${rel} offers /leakhound fix without its scope`);
+    }
+    assert.match(read('reference/scan.md'), /Nothing it handles → do not mention `\/leakhound fix`/);
+    assert.match(read('reference/staged.md'), /Offer `\/leakhound fix` only if/);
+    assert.match(skill, /^\| `\/leakhound fix` \|.*`rls-unverified`/m);
   });
 });
 

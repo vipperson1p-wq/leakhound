@@ -4,7 +4,8 @@
    It checks the staged content of files from `git add`, not the working copy.
 2. Nothing staged → say so and suggest `git add` first, or `/leakhound` for the whole project.
 3. Critical or high findings → say clearly that this commit should not be made yet,
-   explain each finding ([scan.md](scan.md), step 2) and offer `/leakhound fix`.
+   explain each finding ([scan.md](scan.md), step 2). Offer `/leakhound fix` only if
+   there is something it handles ([fix.md](fix.md), "What it handles").
    Never suggest `git commit --no-verify`.
 4. Clean → say the staged files are fine to commit. Mention in one line that files
    not staged were not checked.

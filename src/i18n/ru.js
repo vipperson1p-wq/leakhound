@@ -182,7 +182,8 @@ export default {
   /leakhound history   то же плюс вся история git
   /leakhound staged    только то, что уйдёт в коммит
   /leakhound hook      поставить pre-commit хук (сначала спросит)
-  /leakhound fix       исправить critical-находки по одной, в конце — ключи на перевыпуск`,
+  /leakhound fix       исправить critical-находки по одной, в конце — ключи на перевыпуск;
+                       нет critical — включить RLS для непроверенных таблиц`,
     help: `leakhound {version} — сканер безопасности для вайбкод-проектов на Next.js / Vite + Supabase.
 Находит утёкшие API-ключи, секреты в публичных переменных окружения, .env в git и таблицы без RLS — до деплоя.
 
