@@ -4,7 +4,10 @@
   "description": "Security scanner for vibe-coded Next.js / Vite + Supabase apps: leaked keys, public env secrets, .env in git, missing RLS",
   "type": "module",
   "main": "./src/api.js",
-  "bin": { "vibe-scanner": "./src/index.js" },
+  "bin": {
+    "vibe-scanner": "src/index.js",
+    "vibecode-scanner": "src/index.js"
+  },
   "files": [
     "src/",
     "skills/",
