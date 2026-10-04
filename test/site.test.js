@@ -60,6 +60,16 @@ test('package.json has the bin the global install promises', () => {
   assert.deepEqual(pkg.bin, { vibehound: 'src/index.js' });
 });
 
+test('the site address is the same in package.json and both READMEs', () => {
+  const SITE = 'https://vibehound.vercel.app';
+  assert.equal(JSON.parse(fs.readFileSync('package.json', 'utf8')).homepage, SITE);
+  for (const readme of ['README.md', 'README.ru.md']) {
+    const text = fs.readFileSync(readme, 'utf8');
+    assert.ok(text.includes(`](${SITE})`) && text.includes(`](${SITE}/install)`), `${readme} links the site and /install`);
+    assert.doesNotMatch(text, /leakhound[\w-]*\.vercel\.app/, `${readme}: old site address`);
+  }
+});
+
 test('"Other ways to install" is a real details/summary, and the offline claim matches the hook', () => {
   const page = html['site/install/index.html'];
   const more = /<details class="more">([\s\S]*?)<\/details>/.exec(page);

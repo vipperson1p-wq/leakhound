@@ -52,9 +52,9 @@
      - Перед работой сверить требования с документацией (docs.npmjs.com → Trusted publishing): минимальная версия npm CLI в раннере, поддерживаемые раннеры, provenance. Не угадывать.
      - Push тега = релиз, поэтому тег ставить только с подтверждения владельца.
 4. [x] MCP + skill — одной задачей (в коде; в npm попадёт со следующей публикацией).
-5. [x] Простой лендинг: `site/` (статика без сборки, главная + `/install`), развёрнут 2026-10-03 на **https://leakhound-sable.vercel.app** (имя `leakhound.vercel.app` занято).
-   - 2026-10-04 передеплоен с VibeHound (коммит `d4e3eaf`), sha1 всех файлов совпадают с коммитом, заголовки на месте. Адрес пока старый.
-   - [ ] Переименовать проект в Vercel в `vibehound` (на 2026-10-04 API ещё отдаёт имя `leakhound`) и, если владелец захочет, добавить адрес вида `vibehound-….vercel.app` — старый `leakhound-sable` при переименовании не меняется.
+5. [x] Простой лендинг: `site/` (статика без сборки, главная + `/install`), **https://vibehound.vercel.app** (основной адрес с 2026-10-04; старый `https://leakhound-sable.vercel.app` — тот же проект, продолжает работать).
+   - 2026-10-04 передеплоен с VibeHound (коммит `d4e3eaf`), sha1 всех файлов совпадают с коммитом, заголовки на месте на обоих адресах. Ссылка на сайт — в `homepage` в `package.json` и в шапке обоих README (тест в `test/site.test.js`).
+   - [ ] Переименовать проект в Vercel в `vibehound` (на 2026-10-04 API ещё отдаёт имя `leakhound`). На адреса не влияет.
    - Vercel: команда `vipperson1p-5650s-projects` (Hobby), проект `leakhound` (`prj_Plh63ZkqsgFBugKmnG07kbReIkR3`), root `site`, без фреймворка. **Не привязан к GitHub** — деплой вручную загрузкой файлов из закоммиченного `site/` (target production), чтобы push в `main` не выкатывал продакшен без подтверждения владельца. После деплоя сверять sha1 каждого файла с коммитом.
    - Защита: Vercel Authentication только для preview; продакшен на *.vercel.app публичный.
    - Заголовки — в `site/vercel.json` (CSP только self + Google Fonts, frame-ancestors 'none', nosniff, Referrer-Policy и др.), тест в `test/site.test.js`. Ничего инлайнового в HTML (скрипты, style=, on*=) — сломает CSP, тест ловит.

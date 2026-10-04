@@ -1,6 +1,6 @@
 # 🔍 VibeHound
 
-**English** · [Русский](README.ru.md)
+**English** · [Русский](README.ru.md) · [Website](https://vibehound.vercel.app) · [Install guide](https://vibehound.vercel.app/install)
 
 A security scanner for "vibe-coded" projects — apps built with AI help on
 **Next.js / Vite + Supabase + Vercel**. It catches the mistakes AI assistants
