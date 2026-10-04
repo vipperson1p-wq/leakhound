@@ -20,15 +20,15 @@ Thanks for helping make vibe-coded apps safer! The most valuable contributions a
 Node.js 18+, nothing to install:
 
 ```bash
-git clone https://github.com/vipperson1p-wq/leakhound.git
-cd leakhound
+git clone https://github.com/vipperson1p-wq/vibehound.git
+cd vibehound
 npm test               # unit tests (node:test)
 npm run scan:self      # the scanner must pass on its own code
 npm run scan:fixture   # demo run on the intentionally vulnerable test-project/
 ```
 
 `test-project/` contains **fake** keys on purpose. Don't "fix" it; it is excluded
-from the self-scan via `.leakhoundignore`.
+from the self-scan via `.vibehoundignore`.
 
 ## Adding a secret rule
 

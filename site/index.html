@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>LeakHound — sniffs out leaks before you ship</title>
+<title>VibeHound — sniffs out leaks before you ship</title>
 <meta name="description" content="A free, open-source security scanner for apps built with AI. Finds exposed API keys, secrets in public env variables and Supabase tables without RLS, and explains each one in plain language.">
 <meta name="theme-color" content="#0F1110">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23F5A524' stroke-width='2' stroke-linecap='round'%3E%3Cellipse cx='12' cy='16' rx='4.6' ry='3.8'/%3E%3Ccircle cx='5.6' cy='10.2' r='1.9'/%3E%3Ccircle cx='9.4' cy='6.2' r='1.9'/%3E%3Ccircle cx='14.6' cy='6.2' r='1.9'/%3E%3Ccircle cx='18.4' cy='10.2' r='1.9'/%3E%3C/svg%3E">
@@ -19,15 +19,15 @@
 
 <header class="site-header">
   <nav class="wrap site-nav" aria-label="Main">
-    <a class="brand" href="#top" aria-label="LeakHound, top of the page">
+    <a class="brand" href="#top" aria-label="VibeHound, top of the page">
       <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><ellipse cx="12" cy="16" rx="4.6" ry="3.8"/><circle cx="5.6" cy="10.2" r="1.9"/><circle cx="9.4" cy="6.2" r="1.9"/><circle cx="14.6" cy="6.2" r="1.9"/><circle cx="18.4" cy="10.2" r="1.9"/></svg>
-      <span class="brand-name">LeakHound</span>
+      <span class="brand-name">VibeHound</span>
     </a>
     <div class="nav-links">
       <a href="#how">How it works</a>
       <a href="#checks">Checks</a>
       <a href="#ai">With your AI</a>
-      <a href="https://github.com/vipperson1p-wq/leakhound">GitHub</a>
+      <a href="https://github.com/vipperson1p-wq/vibehound">GitHub</a>
       <a class="btn btn-accent btn-nav" href="/install">Install</a>
     </div>
   </nav>
@@ -42,8 +42,8 @@
     <p class="hero-sub">A security scanner for apps built with AI. Finds exposed API keys, secrets in public env variables and Supabase tables without RLS, then explains each one in plain language.</p>
     <div class="hero-actions">
       <div class="cmd">
-        <span class="prompt" aria-hidden="true">$</span><span class="cmd-text">npx leakhound</span>
-        <button type="button" class="copy-btn is-accent" data-copy="npx leakhound" aria-label="Copy npx leakhound">Copy</button>
+        <span class="prompt" aria-hidden="true">$</span><span class="cmd-text">npx vibehound</span>
+        <button type="button" class="copy-btn is-accent" data-copy="npx vibehound" aria-label="Copy npx vibehound">Copy</button>
       </div>
       <a class="btn btn-outline" href="/install">Connect to your AI →</a>
     </div>
@@ -57,7 +57,7 @@
         <span class="term-path">~/projects/my-app</span>
       </div>
       <div class="term-body">
-        <div><span class="t-dim">$</span> npx leakhound</div>
+        <div><span class="t-dim">$</span> npx vibehound</div>
         <div class="t-dim">git repository · 184 files · 0.9s</div>
         <div class="t-gap-lg" aria-hidden="true"></div>
         <div><span class="badge critical">CRITICAL</span> Supabase service_role key in code</div>
@@ -99,7 +99,7 @@
     <li class="step">
       <div class="step-n">01 · Run</div>
       <h3>One command, no setup</h3>
-      <p>npx leakhound in your project folder. It reads the files git would publish, plus your migrations, in about a second.</p>
+      <p>npx vibehound in your project folder. It reads the files git would publish, plus your migrations, in about a second.</p>
     </li>
     <li class="step">
       <div class="step-n">02 · Read</div>
@@ -133,7 +133,7 @@
       </li>
       <li class="check">
         <div class="check-meta"><span class="check-tag">public env</span><span class="check-sev"><span class="dot high" aria-hidden="true"></span>high</span></div>
-        <div class="check-body"><h3>Secrets in public variables</h3><p>NEXT_PUBLIC_, VITE_ and REACT_APP_ variables are shipped to the browser. LeakHound flags the ones holding secrets.</p></div>
+        <div class="check-body"><h3>Secrets in public variables</h3><p>NEXT_PUBLIC_, VITE_ and REACT_APP_ variables are shipped to the browser. VibeHound flags the ones holding secrets.</p></div>
       </li>
       <li class="check">
         <div class="check-meta"><span class="check-tag">.env</span><span class="check-sev"><span class="dot critical" aria-hidden="true"></span>critical</span></div>
@@ -145,7 +145,7 @@
       </li>
       <li class="check">
         <div class="check-meta"><span class="check-tag">--history</span><span class="check-sev"><span class="dot critical" aria-hidden="true"></span>critical</span></div>
-        <div class="check-body"><h3>Keys hiding in history</h3><p>Deleted a key from the file? It still lives in old commits. LeakHound scans the whole git history.</p></div>
+        <div class="check-body"><h3>Keys hiding in history</h3><p>Deleted a key from the file? It still lives in old commits. VibeHound scans the whole git history.</p></div>
       </li>
       <li class="check">
         <div class="check-meta"><span class="check-tag">install-hook</span><span class="check-sev"><span class="dot" aria-hidden="true"></span>guard</span></div>
@@ -172,10 +172,10 @@
     </div>
 
     <figure class="chat">
-      <div class="chat-user">/leakhound</div>
+      <div class="chat-user">/vibehound</div>
       <div class="chat-tool">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14.7 6.3a4 4 0 0 0-5.4 5.4L3 18l3 3 6.3-6.3a4 4 0 0 0 5.4-5.4l-2.5 2.5-2.5-2.5z"/></svg>
-        <span>leakhound · scan_project</span>
+        <span>vibehound · scan_project</span>
       </div>
       <div class="chat-reply">
         <p>Found one critical issue: a Supabase <code class="accent">service_role</code> key in <code>components/Chat.tsx</code>. Anyone who opens your site can read it and get full access to your database.</p>
@@ -199,7 +199,7 @@
     </div>
     <div class="card card-dashed">
       <h2>Honest about its limits</h2>
-      <p class="note">“No issues found” is not “fully secure”. Every report lists what LeakHound does not check:</p>
+      <p class="note">“No issues found” is not “fully secure”. Every report lists what VibeHound does not check:</p>
       <ul class="dashes">
         <li>Your live database: only migrations in code are checked.</li>
         <li>Access logic in your API routes.</li>
@@ -218,16 +218,16 @@
     <p class="lead">Run it in your project folder. Add the hook so leaks never reach GitHub again.</p>
     <div class="start-cmds">
       <div class="cmd">
-        <span class="prompt" aria-hidden="true">$</span><span class="cmd-text">npx leakhound</span>
-        <button type="button" class="copy-btn is-accent" data-copy="npx leakhound" aria-label="Copy npx leakhound">Copy</button>
+        <span class="prompt" aria-hidden="true">$</span><span class="cmd-text">npx vibehound</span>
+        <button type="button" class="copy-btn is-accent" data-copy="npx vibehound" aria-label="Copy npx vibehound">Copy</button>
       </div>
       <div class="cmd">
-        <span class="prompt" aria-hidden="true">$</span><span class="cmd-text">npx leakhound install-hook</span>
-        <button type="button" class="copy-btn" data-copy="npx leakhound install-hook" aria-label="Copy npx leakhound install-hook">Copy</button>
+        <span class="prompt" aria-hidden="true">$</span><span class="cmd-text">npx vibehound install-hook</span>
+        <button type="button" class="copy-btn" data-copy="npx vibehound install-hook" aria-label="Copy npx vibehound install-hook">Copy</button>
       </div>
     </div>
     <div class="small">First line scans. Second line installs the pre-commit hook.</div>
-    <a class="text-link" href="/install">Full install guide with /leakhound commands →</a>
+    <a class="text-link" href="/install">Full install guide with /vibehound commands →</a>
   </div>
 </section>
 
@@ -235,10 +235,10 @@
 
 <footer class="site-footer">
   <div class="wrap footer-inner">
-    <span>LeakHound · MIT License · made by a vibe coder, for vibe coders</span>
+    <span>VibeHound · MIT License · made by a vibe coder, for vibe coders</span>
     <div class="footer-links">
-      <a href="https://github.com/vipperson1p-wq/leakhound">GitHub</a>
-      <a href="https://www.npmjs.com/package/leakhound">npm</a>
+      <a href="https://github.com/vipperson1p-wq/vibehound">GitHub</a>
+      <a href="https://www.npmjs.com/package/vibehound">npm</a>
     </div>
   </div>
 </footer>

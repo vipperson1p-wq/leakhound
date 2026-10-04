@@ -7,12 +7,12 @@ import path from 'node:path';
 const CLI = path.resolve('src/index.js');
 const VERSION = JSON.parse(fs.readFileSync('package.json', 'utf8')).version;
 
-// LEAKHOUND_LANG pins the language, so the system locale of the machine does not matter
+// VIBEHOUND_LANG pins the language, so the system locale of the machine does not matter
 function run(args, lang = 'en') {
   return spawnSync(process.execPath, [CLI, ...args], {
     encoding: 'utf8',
     timeout: 10_000,
-    env: { ...process.env, LEAKHOUND_LANG: lang },
+    env: { ...process.env, VIBEHOUND_LANG: lang },
   });
 }
 
@@ -22,9 +22,9 @@ describe('--help', () => {
       const r = run([flag]);
       assert.equal(r.status, 0);
       assert.equal(r.stderr, '');
-      assert.ok(r.stdout.includes(`leakhound ${VERSION}`));
+      assert.ok(r.stdout.includes(`vibehound ${VERSION}`));
       for (const item of ['--staged', '--history', 'install-hook', 'install-skill', 'mcp',
-        '--json', '--exclude', '--lang', '--force', '--version', 'npx leakhound']) {
+        '--json', '--exclude', '--lang', '--force', '--version', 'npx vibehound']) {
         assert.ok(r.stdout.includes(item), `help mentions ${item}`);
       }
     });

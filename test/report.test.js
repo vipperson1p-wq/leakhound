@@ -12,7 +12,7 @@ import { scanRaw } from '../src/api.js';
 
 const CLI = path.resolve('src/index.js');
 const strip = (s) => s.replace(/\x1b\[[0-9;]*m/g, '');
-const cli = (args) => spawnSync(process.execPath, [CLI, ...args], { encoding: 'utf8', env: { ...process.env, LEAKHOUND_LANG: '' } });
+const cli = (args) => spawnSync(process.execPath, [CLI, ...args], { encoding: 'utf8', env: { ...process.env, VIBEHOUND_LANG: '' } });
 
 const unverified = (table, line) => ({
   ruleId: 'rls-unverified', severity: 'medium', file: 'm.sql', line, snippetKey: 'rlsUnverified', params: { table },
@@ -21,7 +21,7 @@ const commit = (n) => ({ hash: `${n}`.repeat(40).slice(0, 40), short: `${n}`.rep
 
 // A project where one rule fires several times
 function project() {
-  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'leakhound-report-'));
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'vibehound-report-'));
   fs.writeFileSync(path.join(dir, '.gitignore'), '.env*\n');
   fs.mkdirSync(path.join(dir, 'supabase', 'migrations'), { recursive: true });
   fs.writeFileSync(path.join(dir, 'supabase', 'migrations', '001.sql'), [
@@ -91,10 +91,10 @@ describe('groupFindings', () => {
 });
 
 describe('terminal report', () => {
-  test('header says leakhound', () => {
+  test('header says vibehound', () => {
     const out = strip(cli(['test-project', '--lang', 'en']).stdout);
-    assert.match(out, /🔍 leakhound /);
-    assert.ok(!/vibe-?scanner|vibecode/i.test(out), 'no name from before the rename');
+    assert.match(out, /🔍 vibehound /);
+    assert.ok(!/vibe-?scanner|vibecode|leakhound/i.test(out), 'no name from before the rename');
   });
 
   test('repeated findings are grouped (en)', () => {
@@ -132,7 +132,7 @@ describe('MCP report', () => {
   test('is grouped too, every place still wrapped as repository data', async () => {
     const raw = await scanRaw(project());
     const text = formatResult(raw, 'en', 'proj');
-    assert.match(text, /^leakhound — proj/);
+    assert.match(text, /^vibehound — proj/);
     assert.match(text, /RLS not verified: table created outside migrations \(rls-unverified\) ×3/);
     assert.equal(text.split('Why:').length - 1, 2);
     assert.equal((text.match(/<repository-data>table (reports|profiles|payments)<\/repository-data>/g) || []).length, 3);

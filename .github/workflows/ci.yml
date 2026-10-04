@@ -36,7 +36,7 @@ jobs:
         with:
           node-version: 24
 
-      # Сканер должен проходить на собственном коде (test-project/ исключён в .leakhoundignore)
+      # Сканер должен проходить на собственном коде (test-project/ исключён в .vibehoundignore)
       - name: Scan own code
         run: node src/index.js .
 

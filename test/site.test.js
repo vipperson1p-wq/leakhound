@@ -22,15 +22,15 @@ function snippets(page) {
 }
 
 const CLI_COMMANDS = new Set([
-  'npx leakhound',
-  'npx leakhound --history',
-  'npx leakhound install-hook',
-  'npx leakhound install-skill --user',
-  'npx leakhound install-skill --cursor',
-  'leakhound', // after npm install -g
+  'npx vibehound',
+  'npx vibehound --history',
+  'npx vibehound install-hook',
+  'npx vibehound install-skill --user',
+  'npx vibehound install-skill --cursor',
+  'vibehound', // after npm install -g
 ]);
-const NPM_COMMANDS = new Set(['npm install -g leakhound', 'npm install -D leakhound', 'npm install']);
-const skill = fs.readFileSync('skills/leakhound/SKILL.md', 'utf8');
+const NPM_COMMANDS = new Set(['npm install -g vibehound', 'npm install -D vibehound', 'npm install']);
+const skill = fs.readFileSync('skills/vibehound/SKILL.md', 'utf8');
 const SUBCOMMANDS = /argument-hint:\s*"?\[([^\]]+)\]/.exec(skill)[1].split('|').map((s) => s.trim());
 
 describe('site commands exist', () => {
@@ -39,25 +39,25 @@ describe('site commands exist', () => {
       const all = snippets(page);
       assert.ok(all.length > 3, 'found the snippets');
       for (const s of all) {
-        if (s.startsWith('npx ') || s.startsWith('leakhound')) assert.ok(CLI_COMMANDS.has(s), `unknown CLI command on the site: ${s}`);
+        if (s.startsWith('npx ') || s.startsWith('vibehound')) assert.ok(CLI_COMMANDS.has(s), `unknown CLI command on the site: ${s}`);
         else if (s.startsWith('npm ')) assert.ok(NPM_COMMANDS.has(s), `unknown npm command on the site: ${s}`);
-        else if (s.startsWith('/leakhound')) {
+        else if (s.startsWith('/vibehound')) {
           const sub = s.split(/\s+/)[1];
-          assert.ok(!sub || SUBCOMMANDS.includes(sub), `unknown /leakhound subcommand: ${s}`);
+          assert.ok(!sub || SUBCOMMANDS.includes(sub), `unknown /vibehound subcommand: ${s}`);
         } else if (s.startsWith('claude mcp add')) {
-          assert.equal(s, 'claude mcp add leakhound --scope user -- npx -y leakhound mcp');
+          assert.equal(s, 'claude mcp add vibehound --scope user -- npx -y vibehound mcp');
         } else if (s.startsWith('{')) {
-          assert.deepEqual(JSON.parse(s).mcpServers.leakhound, { command: 'npx', args: ['-y', 'leakhound', 'mcp'] });
+          assert.deepEqual(JSON.parse(s).mcpServers.vibehound, { command: 'npx', args: ['-y', 'vibehound', 'mcp'] });
         }
       }
-      assert.doesNotMatch(html[page], /vibe-?scanner|vibecode/i, 'no old or foreign package names');
+      assert.doesNotMatch(html[page], /vibe-?scanner|vibecode|leakhound/i, 'no old or foreign package names');
     });
   }
 });
 
 test('package.json has the bin the global install promises', () => {
   const pkg = JSON.parse(fs.readFileSync('package.json', 'utf8'));
-  assert.deepEqual(pkg.bin, { leakhound: 'src/index.js' });
+  assert.deepEqual(pkg.bin, { vibehound: 'src/index.js' });
 });
 
 test('"Other ways to install" is a real details/summary, and the offline claim matches the hook', () => {
@@ -65,10 +65,10 @@ test('"Other ways to install" is a real details/summary, and the offline claim m
   const more = /<details class="more">([\s\S]*?)<\/details>/.exec(page);
   assert.ok(more, 'details block exists');
   assert.match(more[1], /<summary>Other ways to install<\/summary>/);
-  assert.ok(more[1].includes('npm install -g leakhound') && more[1].includes('npm install -D leakhound'));
+  assert.ok(more[1].includes('npm install -g vibehound') && more[1].includes('npm install -D vibehound'));
   // "without internet" is only true for the local copy: the hook runs node_modules/.bin first
   const hook = fs.readFileSync('src/hook.js', 'utf8');
-  assert.ok(hook.indexOf('./node_modules/.bin/leakhound') < hook.indexOf('npx --yes'), 'hook tries the local copy before npx');
+  assert.ok(hook.indexOf('./node_modules/.bin/vibehound') < hook.indexOf('npx --yes'), 'hook tries the local copy before npx');
   assert.doesNotMatch(more[1].split('In your project')[0], /internet|offline/i, 'no offline claim for the global install');
 });
 
@@ -87,7 +87,7 @@ describe('the blocked-commit example on /install is the real hook output', () =>
     for (const key of ['blocked', 'blockedFix1', 'blockedFix2', 'npmError1']) {
       assert.ok(lines.includes(en.hook[key]), `missing hook.${key}`);
     }
-    assert.ok(lines.includes(en.hook.npmError2.replace('{package}', 'leakhound')), 'missing hook.npmError2');
+    assert.ok(lines.includes(en.hook.npmError2.replace('{package}', 'vibehound')), 'missing hook.npmError2');
   });
 
   test('the key in the example stays masked', () => {

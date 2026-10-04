@@ -1,14 +1,16 @@
-// The package and the command are both `leakhound`. Two other names must never
+// The package and the command are both `vibehound`. Three other names must never
 // be what we tell the user to fetch from npm:
 //   vibe-scanner     — someone else's package: it would run foreign code;
-//   vibecode-scanner — our old name, deprecated after the rename to LeakHound.
+//   vibecode-scanner — our first name, deprecated after the rename to LeakHound;
+//   leakhound        — our second name, deprecated after the rename to VibeHound
+//                      (other secret scanners already use that name).
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import path from 'node:path';
 
 const PKG = JSON.parse(fs.readFileSync('package.json', 'utf8'));
-const FORBIDDEN = ['vibe-scanner', 'vibecode-scanner'];
+const FORBIDDEN = ['vibe-scanner', 'vibecode-scanner', 'leakhound'];
 
 // npx / bunx / pnpx / pnpm dlx / yarn dlx / npm exec / npm i — with any flags — then the name
 const runs = (name) => new RegExp(
@@ -27,13 +29,13 @@ function packageFiles() {
   return out;
 }
 
-test('the package is leakhound and so is its only command', () => {
-  assert.equal(PKG.name, 'leakhound');
-  assert.deepEqual(Object.keys(PKG.bin), ['leakhound']);
+test('the package is vibehound and so is its only command', () => {
+  assert.equal(PKG.name, 'vibehound');
+  assert.deepEqual(Object.keys(PKG.bin), ['vibehound']);
 });
 
 for (const name of FORBIDDEN) {
-  test(`the patterns catch \`${name}\` and allow leakhound`, () => {
+  test(`the patterns catch \`${name}\` and allow vibehound`, () => {
     for (const bad of [
       `npx ${name} .`,
       `npx -y ${name} mcp`,
@@ -47,13 +49,13 @@ for (const name of FORBIDDEN) {
     assert.match(`{ "command": "npx", "args": ["-y", "${name}", "mcp"] }`, mcpRuns(name));
 
     for (const good of [
-      'npx leakhound .',
-      'npx -y leakhound mcp',
-      'npm install -D leakhound',
-      'claude mcp add leakhound -- npx -y leakhound mcp',
-      `LeakHound used to be published as \`${name}\`.`,
+      'npx vibehound .',
+      'npx -y vibehound mcp',
+      'npm install -D vibehound',
+      'claude mcp add vibehound -- npx -y vibehound mcp',
+      `VibeHound used to be published as \`${name}\`.`,
     ]) assert.doesNotMatch(good, runs(name), good);
-    assert.doesNotMatch('"leakhound": { "command": "npx", "args": ["-y", "leakhound", "mcp"] }', mcpRuns(name));
+    assert.doesNotMatch('"vibehound": { "command": "npx", "args": ["-y", "vibehound", "mcp"] }', mcpRuns(name));
   });
 
   test(`nothing in the package tells the user to run \`${name}\` from npm`, () => {
@@ -65,6 +67,6 @@ for (const name of FORBIDDEN) {
         if (runs(name).test(line) || mcpRuns(name).test(line)) hits.push(`${file}:${i + 1}: ${line.trim()}`);
       });
     }
-    assert.deepEqual(hits, [], `use \`npx leakhound\` — \`${name}\` is not this package`);
+    assert.deepEqual(hits, [], `use \`npx vibehound\` — \`${name}\` is not this package`);
   });
 }

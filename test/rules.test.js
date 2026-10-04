@@ -194,7 +194,7 @@ describe('SQL / RLS', () => {
 });
 
 describe('scanProject', () => {
-  const tmp = () => fs.mkdtempSync(path.join(os.tmpdir(), 'leakhound-'));
+  const tmp = () => fs.mkdtempSync(path.join(os.tmpdir(), 'vibehound-'));
 
   test('missing .gitignore is reported', () => {
     const dir = tmp();
@@ -239,7 +239,7 @@ describe('scanProject', () => {
 
 describe('.env files outside git', () => {
   const pub = (name) => j('NEXT_PUBLIC_', name);
-  const tmp = () => fs.mkdtempSync(path.join(os.tmpdir(), 'leakhound-'));
+  const tmp = () => fs.mkdtempSync(path.join(os.tmpdir(), 'vibehound-'));
 
   test('secret in public variable is detected in folder mode', () => {
     const dir = tmp();

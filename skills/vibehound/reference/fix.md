@@ -1,21 +1,21 @@
-# /leakhound fix — fix findings one by one
+# /vibehound fix — fix findings one by one
 
 ## What it handles
 
 - **Critical** findings in the current files, if there are any.
 - Otherwise **`rls-unverified`** findings: tables that migrations use but never create
   or protect with RLS.
-- Nothing else. High, other medium and low findings are explained by `/leakhound`, with
-  how to fix them ([fixes.md](fixes.md)), but `/leakhound fix` does not take them.
+- Nothing else. High, other medium and low findings are explained by `/vibehound`, with
+  how to fix them ([fixes.md](fixes.md)), but `/vibehound fix` does not take them.
 
-Other commands offer `/leakhound fix` only when a scan found something from this list.
+Other commands offer `/vibehound fix` only when a scan found something from this list.
 
 ## Steps
 
-1. Run `scan_project` (CLI: `npx leakhound . --json --lang <lang>`).
+1. Run `scan_project` (CLI: `npx vibehound . --json --lang <lang>`).
    - Critical findings → go to "Critical findings".
    - No critical, but `rls-unverified` → go to "Tables without verified RLS".
-   - Neither → say there is nothing for `/leakhound fix` to do and stop. Do not change files.
+   - Neither → say there is nothing for `/vibehound fix` to do and stop. Do not change files.
 
 ### Critical findings
 
@@ -38,7 +38,7 @@ Other commands offer `/leakhound fix` only when a scan found something from this
    the provider, the masked fragment (`sk-pro…****`), where it was found, and where to
    rotate it ([fixes.md](fixes.md), last part). Say clearly: moving a key out of the code
    does not make it safe — whoever saw it can still use it until it is rotated.
-7. Do not commit. Suggest `/leakhound staged` before the user commits.
+7. Do not commit. Suggest `/vibehound staged` before the user commits.
 
 ### Tables without verified RLS
 
@@ -67,4 +67,4 @@ Other commands offer `/leakhound fix` only when a scan found something from this
 6. Create only that file. Do not apply it: say it takes effect with `supabase db push`
    (or the next deploy), and that until then the live database is unchanged.
 7. Run `scan_project` again and show that the `rls-unverified` findings are gone.
-   Do not commit. Suggest `/leakhound staged` before the user commits.
+   Do not commit. Suggest `/vibehound staged` before the user commits.

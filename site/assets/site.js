@@ -1,4 +1,4 @@
-// LeakHound site: Copy buttons and the tool tabs on /install. Nothing else.
+// VibeHound site: Copy buttons and the tool tabs on /install. Nothing else.
 (function () {
   'use strict';
 

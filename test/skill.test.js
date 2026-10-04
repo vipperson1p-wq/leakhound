@@ -9,7 +9,7 @@ import en from '../src/i18n/en.js';
 import ru from '../src/i18n/ru.js';
 
 const CLI = path.resolve('src/index.js');
-const tmp = () => fs.mkdtempSync(path.join(os.tmpdir(), 'leakhound-skill-'));
+const tmp = () => fs.mkdtempSync(path.join(os.tmpdir(), 'vibehound-skill-'));
 const read = (rel) => fs.readFileSync(path.join(SKILL_DIR, ...rel.split('/')), 'utf8').replace(/\r\n/g, '\n');
 const skill = read('SKILL.md');
 const files = skillFiles();
@@ -21,7 +21,7 @@ const MCP_TOOLS = ['scan_project', 'scan_staged', 'scan_history'];
 
 describe('SKILL.md', () => {
   test('has Agent Skills frontmatter with name and a trigger description', () => {
-    assert.match(frontmatter, /^name: leakhound$/m);
+    assert.match(frontmatter, /^name: vibehound$/m);
     const description = /^description: (.+)$/m.exec(frontmatter)[1];
     for (const word of ['commit', 'API keys', '.env', 'SQL migrations', 'secure']) assert.ok(description.includes(word), word);
     assert.ok(description.length <= 1024);
@@ -42,8 +42,8 @@ describe('SKILL.md', () => {
     const hint = /^argument-hint:\s*"?\[([^\]]+)\]"?\s*$/m.exec(frontmatter)[1].split('|').map((s) => s.trim());
     assert.deepEqual(hint, SUBCOMMANDS);
 
-    const rows = [...skill.matchAll(/^\| `\/leakhound(?: (\w+))?` \|.*\[reference\/(\w+)\.md\]\(reference\/\2\.md\) \|$/gm)];
-    assert.deepEqual(rows.map((r) => r[1] ?? ''), ['', ...SUBCOMMANDS], 'one row for /leakhound and one per subcommand');
+    const rows = [...skill.matchAll(/^\| `\/vibehound(?: (\w+))?` \|.*\[reference\/(\w+)\.md\]\(reference\/\2\.md\) \|$/gm)];
+    assert.deepEqual(rows.map((r) => r[1] ?? ''), ['', ...SUBCOMMANDS], 'one row for /vibehound and one per subcommand');
     for (const [, sub, file] of rows) assert.equal(file, sub ?? 'scan');
   });
 
@@ -62,7 +62,7 @@ describe('SKILL.md', () => {
   test('refers only to tools and rule ids that exist', () => {
     for (const tool of all.match(/\bscan_(\w+)/g)) assert.ok(MCP_TOOLS.includes(tool), tool);
     const ruleIds = [...all.matchAll(/`([a-z0-9]+(?:-[a-z0-9]+)+)`/g)].map((m) => m[1])
-      .filter((id) => !['leakhound', 'install-skill', 'no-verify', 'filter-repo', 'pre-commit'].includes(id));
+      .filter((id) => !['vibehound', 'install-skill', 'no-verify', 'filter-repo', 'pre-commit'].includes(id));
     for (const id of ruleIds) assert.ok(en.rules[id], `unknown ruleId in the skill: ${id}`);
   });
 
@@ -83,7 +83,7 @@ describe('SKILL.md', () => {
   });
 });
 
-describe('/leakhound fix scope', () => {
+describe('/vibehound fix scope', () => {
   const fix = read('reference/fix.md');
   const section = (title) => fix.split(/^#{2,3} /m).find((s) => s.startsWith(title));
 
@@ -92,7 +92,7 @@ describe('/leakhound fix scope', () => {
     assert.match(scope, /\*\*Critical\*\* findings/);
     assert.match(scope, /Otherwise \*\*`rls-unverified`\*\*/);
     assert.match(scope, /Nothing else/);
-    assert.match(section('Steps'), /Neither → say there is nothing for `\/leakhound fix` to do and stop/);
+    assert.match(section('Steps'), /Neither → say there is nothing for `\/vibehound fix` to do and stop/);
   });
 
   test('rls-unverified: one new migration, if exists, browser check, asks first, does not apply', () => {
@@ -108,15 +108,15 @@ describe('/leakhound fix scope', () => {
     ]) assert.ok(rls.includes(s), s);
   });
 
-  test('the skill offers /leakhound fix only together with what it handles', () => {
+  test('the skill offers /vibehound fix only together with what it handles', () => {
     for (const rel of files.filter((f) => f.endsWith('.md') && !['SKILL.md', 'reference/fix.md'].includes(f))) {
       const text = read(rel);
-      if (!text.includes('/leakhound fix')) continue;
-      assert.match(text, /\(\[fix\.md\]\(fix\.md\), "What it handles"\)/, `${rel} offers /leakhound fix without its scope`);
+      if (!text.includes('/vibehound fix')) continue;
+      assert.match(text, /\(\[fix\.md\]\(fix\.md\), "What it handles"\)/, `${rel} offers /vibehound fix without its scope`);
     }
-    assert.match(read('reference/scan.md'), /Nothing it handles → do not mention `\/leakhound fix`/);
-    assert.match(read('reference/staged.md'), /Offer `\/leakhound fix` only if/);
-    assert.match(skill, /^\| `\/leakhound fix` \|.*`rls-unverified`/m);
+    assert.match(read('reference/scan.md'), /Nothing it handles → do not mention `\/vibehound fix`/);
+    assert.match(read('reference/staged.md'), /Offer `\/vibehound fix` only if/);
+    assert.match(skill, /^\| `\/vibehound fix` \|.*`rls-unverified`/m);
   });
 });
 
@@ -128,7 +128,7 @@ describe('install-skill', () => {
   test('project install copies the whole skill; own copy is replaced; foreign file needs --force', () => {
     const dir = tmp();
     const first = installSkill({ root: dir });
-    const target = path.join(dir, '.claude', 'skills', 'leakhound');
+    const target = path.join(dir, '.claude', 'skills', 'vibehound');
     assert.equal(first.file, path.join(target, 'SKILL.md'));
     assert.equal(first.overwritten, false);
     sameAsSource(target);
@@ -149,14 +149,14 @@ describe('install-skill', () => {
   test('--user installs into ~/.claude/skills', () => {
     const home = tmp();
     const { file } = installSkill({ where: 'user', home });
-    assert.equal(file, path.join(home, '.claude', 'skills', 'leakhound', 'SKILL.md'));
+    assert.equal(file, path.join(home, '.claude', 'skills', 'vibehound', 'SKILL.md'));
     sameAsSource(path.dirname(file));
   });
 
   test('--cursor installs the same skill into .cursor/skills (a slash command in Cursor 2.4+)', () => {
     const dir = tmp();
     const { file } = installSkill({ where: 'cursor', root: dir });
-    assert.equal(file, path.join(dir, '.cursor', 'skills', 'leakhound', 'SKILL.md'));
+    assert.equal(file, path.join(dir, '.cursor', 'skills', 'vibehound', 'SKILL.md'));
     sameAsSource(path.dirname(file));
   });
 
@@ -166,35 +166,59 @@ describe('install-skill', () => {
     fs.mkdirSync(oldDir, { recursive: true });
     fs.writeFileSync(path.join(oldDir, 'SKILL.md'), '---\nname: vibe-scanner\n---\n<!-- vibe-scanner skill (installed by: vibe-scanner install-skill) -->\n');
     const { removedLegacy } = installSkill({ root: dir });
-    assert.equal(removedLegacy, path.join(oldDir, 'SKILL.md'));
+    assert.deepEqual(removedLegacy, [path.join(oldDir, 'SKILL.md')]);
     assert.ok(!fs.existsSync(oldDir), 'empty old folder removed too');
 
     const cursorDir = tmp();
     const oldRule = path.join(cursorDir, '.cursor', 'rules', 'vibe-scanner.mdc');
     fs.mkdirSync(path.dirname(oldRule), { recursive: true });
     fs.writeFileSync(oldRule, "somebody else's rule");
-    assert.equal(installSkill({ where: 'cursor', root: cursorDir }).removedLegacy, null);
+    assert.deepEqual(installSkill({ where: 'cursor', root: cursorDir }).removedLegacy, []);
     assert.equal(fs.readFileSync(oldRule, 'utf8'), "somebody else's rule");
 
     fs.writeFileSync(oldRule, '---\ndescription: x\n---\n<!-- vibe-scanner skill (installed by: vibe-scanner install-skill) -->\n');
-    assert.equal(installSkill({ where: 'cursor', root: cursorDir }).removedLegacy, oldRule);
+    assert.deepEqual(installSkill({ where: 'cursor', root: cursorDir }).removedLegacy, [oldRule]);
   });
 
-  test('CLI output is localized and lists the /leakhound commands', () => {
+  test('our leakhound copy (with reference/) is removed whole, a foreign leakhound skill is kept', () => {
+    const legacy = '---\nname: leakhound\n---\n<!-- leakhound skill (installed by: leakhound install-skill) -->\n';
+    for (const [where, rel] of [['project', ['.claude', 'skills']], ['cursor', ['.cursor', 'skills']]]) {
+      const dir = tmp();
+      const oldDir = path.join(dir, ...rel, 'leakhound');
+      fs.mkdirSync(path.join(oldDir, 'reference'), { recursive: true });
+      fs.writeFileSync(path.join(oldDir, 'SKILL.md'), legacy);
+      fs.writeFileSync(path.join(oldDir, 'reference', 'scan.md'), 'old');
+      assert.deepEqual(installSkill({ where, root: dir }).removedLegacy, [oldDir], where);
+      assert.ok(!fs.existsSync(oldDir), `${where}: old folder removed`);
+
+      fs.mkdirSync(oldDir, { recursive: true });
+      fs.writeFileSync(path.join(oldDir, 'SKILL.md'), '---\nname: leakhound\n---\nsomebody else\n');
+      assert.deepEqual(installSkill({ where, root: dir }).removedLegacy, [], where);
+      assert.ok(fs.existsSync(path.join(oldDir, 'SKILL.md')), `${where}: foreign skill kept`);
+    }
+
+    const home = tmp();
+    const userOld = path.join(home, '.claude', 'skills', 'leakhound');
+    fs.mkdirSync(userOld, { recursive: true });
+    fs.writeFileSync(path.join(userOld, 'SKILL.md'), legacy);
+    assert.deepEqual(installSkill({ where: 'user', home }).removedLegacy, [userOld]);
+  });
+
+  test('CLI output is localized and lists the /vibehound commands', () => {
     const dir = tmp();
     const r = spawnSync(process.execPath, [CLI, 'install-skill', dir, '--lang', 'ru'], { encoding: 'utf8' });
     assert.equal(r.status, 0, r.stderr);
     assert.match(r.stdout, /Skill установлен/);
     const r2 = spawnSync(process.execPath, [CLI, 'install-skill', dir, '--cursor', '--lang', 'en'], { encoding: 'utf8' });
-    assert.match(r2.stdout, /Skill installed: .*\.cursor[\\/]skills[\\/]leakhound[\\/]SKILL\.md/);
+    assert.match(r2.stdout, /Skill installed: .*\.cursor[\\/]skills[\\/]vibehound[\\/]SKILL\.md/);
     for (const out of [r.stdout, r2.stdout]) {
-      for (const sub of SUBCOMMANDS) assert.match(out, new RegExp(`/leakhound ${sub}\\b`));
+      for (const sub of SUBCOMMANDS) assert.match(out, new RegExp(`/vibehound ${sub}\\b`));
     }
   });
 
   test('both languages list the same subcommands as the skill', () => {
     for (const dict of [en, ru]) {
-      const listed = [...dict.cli.skillCommands.matchAll(/\/leakhound (\w+)/g)].map((m) => m[1]);
+      const listed = [...dict.cli.skillCommands.matchAll(/\/vibehound (\w+)/g)].map((m) => m[1]);
       assert.deepEqual(listed, SUBCOMMANDS);
     }
   });

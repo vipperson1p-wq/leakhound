@@ -11,7 +11,7 @@ const KEY2 = ['sk-', 'ant-', 'api03-', 'A1b2C3d4E5f6G7h8I9j0K1l2'].join('');
 const CLI = path.resolve('src/index.js');
 
 function repo() {
-  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'leakhound-hist-'));
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'vibehound-hist-'));
   const git = (...args) => execFileSync('git', ['-c', 'user.name=t', '-c', 'user.email=t@t', ...args], { cwd: dir, stdio: 'pipe' }).toString().trim();
   const write = (rel, content) => {
     fs.mkdirSync(path.dirname(path.join(dir, rel)), { recursive: true });
@@ -90,14 +90,14 @@ describe('--history', () => {
     assert.equal(findings[0].commit.hash, added);
   });
 
-  test('excluded paths and .leakhoundignore are respected', async () => {
+  test('excluded paths and .vibehoundignore are respected', async () => {
     const { dir, write, commit } = repo();
     write('fixtures/k.ts', `k = "${KEY}"`);
     write('other/k.ts', `k = "${KEY2}"`);
     commit('add');
     write('fixtures/k.ts', '');
     write('other/k.ts', '');
-    write('.leakhoundignore', 'other/\n');
+    write('.vibehoundignore', 'other/\n');
     commit('clear');
     assert.deepEqual((await scanHistory(dir, { exclude: ['fixtures/'] })).findings, []);
   });
@@ -109,7 +109,7 @@ describe('--history', () => {
   });
 
   test('throws outside git repository', async () => {
-    const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'leakhound-'));
+    const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'vibehound-'));
     await assert.rejects(scanHistory(dir), /git/);
   });
 

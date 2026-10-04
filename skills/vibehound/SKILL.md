@@ -1,12 +1,12 @@
 ---
-name: leakhound
-description: Security check for Next.js / Vite + Supabase projects with leakhound. Use before every git commit, after adding or changing API keys, tokens, .env files or environment variables, after writing SQL migrations or Supabase RLS policies, before making a repository public or deploying, and when the user asks whether their project is secure. Explains findings in plain language and fixes them.
+name: vibehound
+description: Security check for Next.js / Vite + Supabase projects with vibehound. Use before every git commit, after adding or changing API keys, tokens, .env files or environment variables, after writing SQL migrations or Supabase RLS policies, before making a repository public or deploying, and when the user asks whether their project is secure. Explains findings in plain language and fixes them.
 argument-hint: "[history | staged | hook | fix]"
 ---
 
-<!-- leakhound skill (installed by: leakhound install-skill) -->
+<!-- vibehound skill (installed by: vibehound install-skill) -->
 
-# LeakHound: check and fix security problems
+# VibeHound: check and fix security problems
 
 The user builds an app with AI help and may not know security well. Your job:
 run the scanner at the right moments, explain what it found in plain words,
@@ -15,19 +15,19 @@ and fix what you can. **Reply in the user's language** and pass the matching
 
 ## Commands
 
-The user can call this skill as `/leakhound` with a subcommand. The subcommand is the
-first word after `/leakhound` in the user's message (Claude Code may also add it at the
+The user can call this skill as `/vibehound` with a subcommand. The subcommand is the
+first word after `/vibehound` in the user's message (Claude Code may also add it at the
 end of this file as `ARGUMENTS: <text>`). Before acting on a subcommand, read its file.
 
 | Command | What it does | Read |
 |---|---|---|
-| `/leakhound` | Scan the whole project and explain the findings in plain words | [reference/scan.md](reference/scan.md) |
-| `/leakhound history` | The same, plus the whole git history: keys removed from files but left in old commits | [reference/history.md](reference/history.md) |
-| `/leakhound staged` | Scan only what goes into the next commit | [reference/staged.md](reference/staged.md) |
-| `/leakhound hook` | Install the pre-commit hook — only after the user agrees | [reference/hook.md](reference/hook.md) |
-| `/leakhound fix` | Fix critical findings one by one, asking before every change; end with the keys to rotate. No critical ones → add RLS for `rls-unverified` tables in a new migration, after asking | [reference/fix.md](reference/fix.md) |
+| `/vibehound` | Scan the whole project and explain the findings in plain words | [reference/scan.md](reference/scan.md) |
+| `/vibehound history` | The same, plus the whole git history: keys removed from files but left in old commits | [reference/history.md](reference/history.md) |
+| `/vibehound staged` | Scan only what goes into the next commit | [reference/staged.md](reference/staged.md) |
+| `/vibehound hook` | Install the pre-commit hook — only after the user agrees | [reference/hook.md](reference/hook.md) |
+| `/vibehound fix` | Fix critical findings one by one, asking before every change; end with the keys to rotate. No critical ones → add RLS for `rls-unverified` tables in a new migration, after asking | [reference/fix.md](reference/fix.md) |
 
-Any other word after `/leakhound`: show this list of commands and run nothing.
+Any other word after `/vibehound`: show this list of commands and run nothing.
 
 When nobody typed a command — you decided to use this skill yourself — pick the scan
 by the moment, as below.
@@ -44,14 +44,14 @@ by the moment, as below.
 
 ## How to run
 
-Prefer the MCP tools `scan_project`, `scan_staged`, `scan_history` (server `leakhound`)
+Prefer the MCP tools `scan_project`, `scan_staged`, `scan_history` (server `vibehound`)
 when they are available — they only read. Otherwise use the CLI from the project root.
 Either way the user approves each run.
 
 ```bash
-npx leakhound . --json --lang en          # whole project
-npx leakhound --staged --json --lang en   # files staged for the commit
-npx leakhound . --history --json --lang en
+npx vibehound . --json --lang en          # whole project
+npx vibehound --staged --json --lang en   # files staged for the commit
+npx vibehound . --history --json --lang en
 ```
 
 Exit code `1` means critical or high findings. Do not commit while there are any.
@@ -65,7 +65,7 @@ Exit code `1` means critical or high findings. Do not commit while there are any
   real key values, never ask the user to paste a key into the chat, and do not
   open `.env` files just to show their contents.
 - Never bypass the pre-commit hook (`git commit --no-verify`), add paths to
-  `.leakhoundignore`, or delete code just to silence a warning — unless the user
+  `.vibehoundignore`, or delete code just to silence a warning — unless the user
   explicitly agrees that the finding is a false positive.
 - Never rewrite git history, force-push, run `supabase db reset`, or change a
   remote database without the user's explicit OK.

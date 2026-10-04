@@ -321,7 +321,7 @@ function readStaged(root, rel) {
   }
 }
 
-// options.exclude — шаблоны из --exclude, дополняют .leakhoundignore
+// options.exclude — шаблоны из --exclude, дополняют .vibehoundignore
 // options.staged  — проверять только файлы из индекса (для pre-commit хука)
 export function scanProject(root, { exclude = [], staged = false } = {}) {
   root = path.resolve(root);

@@ -1,4 +1,4 @@
-# LeakHound — инструкция для Claude Code
+# VibeHound — инструкция для Claude Code
 
 ## Что это за проект
 Сканер безопасности для вайбкод-проектов (Next.js / Vite + Supabase + Vercel).
@@ -16,8 +16,8 @@
 - `src/api.js` — программный API: `scan(path, { lang, history, staged, exclude })` → локализованный результат; `scanRaw` — без текстов. Точка входа пакета (`main`).
 - `src/scan.js` — движок: собирает файлы (через `git ls-files`, если это репозиторий) и применяет правила.
 - `src/report.js` — вывод в терминал. `src/index.js` — CLI (`--json`, `--staged`, `--history`, `--exclude`, `--lang`, `--help`, `--version`, `install-hook`).
-- `src/ignore.js` — исключения (`.leakhoundignore`; старый `.vibescanignore` тоже читается), `src/hook.js` — pre-commit хук.
-- `src/mcp.js` — MCP-сервер (stdio), `src/skill.js` + `skills/leakhound/` (SKILL.md + reference/) — skill и слэш-команда `/leakhound` для AI-ассистентов.
+- `src/ignore.js` — исключения (`.vibehoundignore`; старый `.vibescanignore` тоже читается), `src/hook.js` — pre-commit хук.
+- `src/mcp.js` — MCP-сервер (stdio), `src/skill.js` + `skills/vibehound/` (SKILL.md + reference/) — skill и слэш-команда `/vibehound` для AI-ассистентов.
 - `src/detectors/history.js` — `--history`: ключи, удалённые из файлов, но оставшиеся в истории git.
 - `test/` — тесты (`npm test`). Фикстура вручную: `npm run scan:fixture`, самопроверка: `npm run scan:self`.
 - `test-project/` — НАМЕРЕННО уязвимый проект с ФЕЙКОВЫМИ ключами для тестов. Не исправлять его. Исключать из самопроверки.
@@ -38,19 +38,23 @@
 Проект полностью open source (MIT), без подписок, только донаты.
 
 1. [x] Пробелы 1 и 3 (см. «Закрытые пробелы» ниже).
-2. [x] Подготовка к open source. Репозиторий публичный с 2026-10-03: github.com/vipperson1p-wq/leakhound (до переименования — vibecode-scanner, GitHub перенаправляет старые ссылки).
-3. [ ] Публикация в npm: пакет и команда — `leakhound`. Публикует владелец сам; push новой версии в npm — только после его подтверждения.
-   - **Переименование 2026-10-03:** Vibe Scanner / `vibecode-scanner` → **LeakHound / `leakhound`** (с 0.1.0). `vibecode-scanner` (0.1.0, 0.1.1) — пометить deprecated после публикации `leakhound`. Имя `vibe-scanner` в npm — **чужой пакет**: никогда не писать `npx vibe-scanner`; `test/package-name.test.js` ловит запуск обоих старых имён.
-   - Совместимость со старым именем: хук с маркером `# vibe-scanner pre-commit hook` заменяется без `--force`; `install-skill` удаляет наш старый skill (`vibe-scanner/`, `vibe-scanner.mdc` с нашим маркером); `.vibescanignore` читается вместе с `.leakhoundignore`. `VIBESCAN_LANG` → `LEAKHOUND_LANG` без совместимости.
+2. [x] Подготовка к open source. Репозиторий публичный с 2026-10-03: github.com/vipperson1p-wq/vibehound (раньше — vibecode-scanner, затем leakhound; GitHub перенаправляет старые ссылки).
+3. [ ] Публикация в npm: пакет и команда — `vibehound`. Публикует владелец сам; push новой версии в npm — только после его подтверждения.
+   - **Переименование 2026-10-03:** Vibe Scanner / `vibecode-scanner` → LeakHound / `leakhound` (с 0.1.0). `vibecode-scanner` (0.1.0, 0.1.1) — пометить deprecated. Имя `vibe-scanner` в npm — **чужой пакет**: никогда не писать `npx vibe-scanner`.
+   - **Переименование 2026-10-04:** LeakHound / `leakhound` → **VibeHound / `vibehound`** (с 0.1.0): имя leakhound уже занято другими сканерами секретов (PyPI, GitHub). `leakhound` 0.1.0–0.1.3 в npm — пометить deprecated **после** публикации `vibehound`:
+     `npm deprecate leakhound "Renamed to vibehound: npm i -D vibehound / npx vibehound — https://github.com/vipperson1p-wq/vibehound"`
+     `test/package-name.test.js` ловит запуск всех трёх старых/чужих имён (`vibe-scanner`, `vibecode-scanner`, `leakhound`).
+   - Совместимость со старыми именами: хук с маркером `# vibe-scanner pre-commit hook` или `# leakhound pre-commit hook` заменяется без `--force`; `install-skill` удаляет наш старый skill (`vibe-scanner/`, `vibe-scanner.mdc`, папки `leakhound/` в `.claude/skills` и `.cursor/skills` — только с нашим маркером); `.leakhoundignore` и `.vibescanignore` читаются вместе с `.vibehoundignore`. `VIBESCAN_LANG` / `LEAKHOUND_LANG` → `VIBEHOUND_LANG` без совместимости.
    - [ ] **Релизы только из CI: GitHub Actions + npm trusted publishing (OIDC, без токенов).** Сейчас публикует владелец вручную с ноутбука (`npm publish` + подтверждение в браузере). Цель — чтобы новая версия попадала в npm только из CI, с provenance.
      - Workflow `.github/workflows/release.yml`: запуск по тегу `v*` (или GitHub Release), `permissions: id-token: write, contents: read`, `npm test` + самопроверка + проверка, что версия в `package.json` совпадает с тегом, затем `npm publish --access public`. Без `NPM_TOKEN` в секретах.
-     - На npmjs.com в настройках пакета `leakhound` добавить Trusted Publisher: GitHub Actions, `vipperson1p-wq/leakhound`, имя файла workflow. Делает владелец (вход в npm).
+     - На npmjs.com в настройках пакета `vibehound` добавить Trusted Publisher: GitHub Actions, `vipperson1p-wq/vibehound`, имя файла workflow. Делает владелец (вход в npm).
      - После первой успешной публикации из CI — в настройках пакета запретить публикацию токенами (оставить только trusted publishing + 2FA).
      - Перед работой сверить требования с документацией (docs.npmjs.com → Trusted publishing): минимальная версия npm CLI в раннере, поддерживаемые раннеры, provenance. Не угадывать.
      - Push тега = релиз, поэтому тег ставить только с подтверждения владельца.
 4. [x] MCP + skill — одной задачей (в коде; в npm попадёт со следующей публикацией).
 5. [x] Простой лендинг: `site/` (статика без сборки, главная + `/install`), развёрнут 2026-10-03 на **https://leakhound-sable.vercel.app** (имя `leakhound.vercel.app` занято).
-   - Vercel: команда `vipperson1p-5650s-projects` (Hobby), проект `leakhound` (`prj_Plh63ZkqsgFBugKmnG07kbReIkR3`), root `site`, без фреймворка. **Не привязан к GitHub** — деплой вручную загрузкой файлов из закоммиченного `site/` (target production), чтобы push в `main` не выкатывал продакшен без подтверждения владельца. После деплоя сверять sha1 каждого файла с коммитом.
+   - [ ] **После переименования в VibeHound сайт не передеплоен** — на проде ещё LeakHound. Передеплой и новый адрес (`vibehound` в Vercel) — только с подтверждения владельца.
+   - Vercel: команда `vipperson1p-5650s-projects` (Hobby), проект `leakhound` (`prj_Plh63ZkqsgFBugKmnG07kbReIkR3`, имя проекта пока старое), root `site`, без фреймворка. **Не привязан к GitHub** — деплой вручную загрузкой файлов из закоммиченного `site/` (target production), чтобы push в `main` не выкатывал продакшен без подтверждения владельца. После деплоя сверять sha1 каждого файла с коммитом.
    - Защита: Vercel Authentication только для preview; продакшен на *.vercel.app публичный.
    - Заголовки — в `site/vercel.json` (CSP только self + Google Fonts, frame-ancestors 'none', nosniff, Referrer-Policy и др.), тест в `test/site.test.js`. Ничего инлайнового в HTML (скрипты, style=, on*=) — сломает CSP, тест ловит.
    - [ ] Свой домен — отдельно, по решению владельца. HSTS без includeSubDomains — специально, чтобы не задеть поддомены будущего домена.
@@ -95,24 +99,24 @@
 5. [ ] **Бенчмарк ложных срабатываний.** Скрипт, который клонирует набор публичных проектов Next.js + Supabase и считает ложные срабатывания. Клонировать только во временную папку, результаты — только агрегированные числа и замаскированные фрагменты; найденные настоящие ключи не публиковать (принцип 4), список репозиториев — в конфиге скрипта.
 
 ### Фаза «MCP и skill» (сделано в коде; в npm — со следующей публикацией)
-- [x] Локальный MCP-сервер (stdio): `src/mcp.js`, запуск `npx -y leakhound mcp [--lang ru]`, без наших серверов. **Без зависимостей** — свой JSON-RPC вместо SDK (меньше чужого кода в инструменте безопасности).
+- [x] Локальный MCP-сервер (stdio): `src/mcp.js`, запуск `npx -y vibehound mcp [--lang ru]`, без наших серверов. **Без зависимостей** — свой JSON-RPC вместо SDK (меньше чужого кода в инструменте безопасности).
 - [x] Протокол: **dual-era** — современный MCP 2026-07-28 (версия в `_meta` каждого запроса, `server/discover`, `resultType`, `ttlMs`/`cacheScope`, ошибка -32022 для неизвестной версии) и старые клиенты с `initialize` (2024-11-05 … 2025-11-25). При выходе новых версий протокола — сверяться со схемой в `modelcontextprotocol/modelcontextprotocol` (папка `schema/`).
 - [x] Инструменты только для чтения: `scan_project`, `scan_staged`, `scan_history` (annotations: readOnlyHint), параметры `path`, `lang`, `exclude`. Отказ сканировать домашнюю папку и корень диска.
 - [x] Ключи всегда замаскированы, файлы целиком не возвращаются (только строки ≤160 символов), максимум 50 находок в ответе.
 - [x] Всё из репозитория (пути, код, сообщения коммитов) — в `<repository-data>…</repository-data>`, внутри вычищены переводы строк и угловые скобки — файл не может «закрыть» тег. Тест с атакой через содержимое файла и сообщение коммита — `test/mcp.test.js`.
 - [x] Инструкции по подключению для Claude Code, Cursor и Claude Desktop — в README (en/ru).
-- [x] **Skill:** `skills/leakhound/SKILL.md` (стандарт Agent Skills, английский, «отвечай на языке пользователя»), ставится командой `leakhound install-skill` (`.claude/skills/` в проекте, `--user` → `~/.claude/skills/`, `--cursor` → `.cursor/skills/leakhound/`). Тест сверяет, что skill ссылается только на существующие инструменты и ruleId.
-- [x] **Слэш-команда `/leakhound [history|staged|hook|fix]`** (2026-10-03) — тот же skill, без отдельных `.claude/commands` / `.cursor/commands` (в Claude Code skill — это и есть команда; Cursor 2.4+ запускает skills как `/имя` и читает `.claude/skills/`, а `.cursor/commands` переводит в skills). Подкоманда — первое слово после `/leakhound` (Claude Code ещё дописывает `ARGUMENTS: …`); как Cursor передаёт аргументы, в документации нет — проверить вручную. Таблица команд в SKILL.md, инструкции — в `reference/<команда>.md`. Автозапуск по description сохранён (`disable-model-invocation` не ставить).
-  - **`allowed-tools` в skill нет совсем** (решение владельца 2026-10-03, с 0.1.1): Claude Code спрашивает разрешение на каждый запуск сканера, в том числе MCP. Тест падает, если `allowed-tools` (в любом написании) появится в любом файле skill. Если когда-нибудь вернуть — только `mcp__leakhound__scan_*` и никогда `Bash(npx leakhound *)`: префикс пропустил бы `install-hook` и любую версию из npm.
+- [x] **Skill:** `skills/vibehound/SKILL.md` (стандарт Agent Skills, английский, «отвечай на языке пользователя»), ставится командой `vibehound install-skill` (`.claude/skills/` в проекте, `--user` → `~/.claude/skills/`, `--cursor` → `.cursor/skills/vibehound/`). Тест сверяет, что skill ссылается только на существующие инструменты и ruleId.
+- [x] **Слэш-команда `/vibehound [history|staged|hook|fix]`** (2026-10-03) — тот же skill, без отдельных `.claude/commands` / `.cursor/commands` (в Claude Code skill — это и есть команда; Cursor 2.4+ запускает skills как `/имя` и читает `.claude/skills/`, а `.cursor/commands` переводит в skills). Подкоманда — первое слово после `/vibehound` (Claude Code ещё дописывает `ARGUMENTS: …`); как Cursor передаёт аргументы, в документации нет — проверить вручную. Таблица команд в SKILL.md, инструкции — в `reference/<команда>.md`. Автозапуск по description сохранён (`disable-model-invocation` не ставить).
+  - **`allowed-tools` в skill нет совсем** (решение владельца 2026-10-03, с 0.1.1): Claude Code спрашивает разрешение на каждый запуск сканера, в том числе MCP. Тест падает, если `allowed-tools` (в любом написании) появится в любом файле skill. Если когда-нибудь вернуть — только `mcp__vibehound__scan_*` и никогда `Bash(npx vibehound *)`: префикс пропустил бы `install-hook` и любую версию из npm.
 - [ ] Проверить с настоящими клиентами (Claude Code, Cursor, Claude Desktop) после публикации в npm.
 ### Фаза 1 — довести CLI (готово)
 - [x] Корневой `.gitignore` (node_modules, .env*, но `!test-project/.env.local` — это фикстура).
 - [x] Тесты на `node:test`: каждое правило ловит то, что должно, и НЕ ловит anon-ключ Supabase и заглушки вроде `your-api-key-here`.
 - [x] Режим `--staged`: проверять только файлы из `git diff --cached --name-only`.
 - [x] Команда `install-hook`: ставит pre-commit хук, который запускает `--staged` и блокирует коммит при critical/high.
-  - [x] Хук переведён на npm-пакет `leakhound`. Порядок запуска в хуке: `node_modules/.bin/leakhound` → путь к исходникам (только если хук ставили из клона репозитория) → `npx --yes leakhound@<версия>`, версия закреплена при установке хука. Ничего нет — предупреждение и коммит без проверки.
+  - [x] Хук переведён на npm-пакет `vibehound`. Порядок запуска в хуке: `node_modules/.bin/vibehound` → путь к исходникам (только если хук ставили из клона репозитория) → `npx --yes vibehound@<версия>`, версия закреплена при установке хука. Ничего нет — предупреждение и коммит без проверки.
 - [x] Блок в отчёте «Что сканер НЕ проверяет» (живую базу, зависимости, логику доступа в коде, историю git и т.д.).
-- [x] Флаг `--exclude <путь>` и файл `.leakhoundignore`.
+- [x] Флаг `--exclude <путь>` и файл `.vibehoundignore`.
 - [x] GitHub Action: прогон тестов + самопроверка сканером (исключая `test-project/`).
 
 ### Фаза 1.5 — сильные алгоритмы обнаружения (без AI) — оставшееся после отзывов
@@ -131,7 +135,7 @@ AI в обнаружении НЕ участвует: только после п
 - [ ] **Исключения и baseline**:
   - [x] встроенный список известных фейковых ключей из документации (например, `AKIAIOSFODNN7EXAMPLE`) — `KNOWN_EXAMPLE_KEYS` в `src/rules.js`, расширять по мере надобности;
   - понижение приоритета для папок `test/`, `__tests__/`, `fixtures/`, `examples/`;
-  - файл `.leakhound-baseline.json` и команда `baseline`: сохранить текущие находки как принятые и дальше показывать только новые. В baseline хранить хэш находки, а НЕ сам секрет.
+  - файл `.vibehound-baseline.json` и команда `baseline`: сохранить текущие находки как принятые и дальше показывать только новые. В baseline хранить хэш находки, а НЕ сам секрет.
 - [ ] У каждой находки поле `confidence` (high / medium / low), чтобы AI-слой и интерфейс могли сортировать.
 
 **Не делать без отдельного решения владельца:** проверку ключей на «живость» через API провайдеров. Если когда-нибудь добавлять — только для собственных репозиториев пользователя, только по явному согласию и только безопасными read-only запросами.

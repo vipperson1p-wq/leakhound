@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Install LeakHound</title>
-<meta name="description" content="Connect LeakHound to Claude Code, Cursor or Claude Desktop, run your first scan and guard every commit. About two minutes, everything runs on your machine.">
+<title>Install VibeHound</title>
+<meta name="description" content="Connect VibeHound to Claude Code, Cursor or Claude Desktop, run your first scan and guard every commit. About two minutes, everything runs on your machine.">
 <meta name="theme-color" content="#0F1110">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23F5A524' stroke-width='2' stroke-linecap='round'%3E%3Cellipse cx='12' cy='16' rx='4.6' ry='3.8'/%3E%3Ccircle cx='5.6' cy='10.2' r='1.9'/%3E%3Ccircle cx='9.4' cy='6.2' r='1.9'/%3E%3Ccircle cx='14.6' cy='6.2' r='1.9'/%3E%3Ccircle cx='18.4' cy='10.2' r='1.9'/%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -19,14 +19,14 @@
 
 <header class="site-header">
   <nav class="wrap site-nav" aria-label="Main">
-    <a class="brand" href="/" aria-label="LeakHound home">
+    <a class="brand" href="/" aria-label="VibeHound home">
       <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><ellipse cx="12" cy="16" rx="4.6" ry="3.8"/><circle cx="5.6" cy="10.2" r="1.9"/><circle cx="9.4" cy="6.2" r="1.9"/><circle cx="14.6" cy="6.2" r="1.9"/><circle cx="18.4" cy="10.2" r="1.9"/></svg>
-      <span class="brand-name">LeakHound</span>
+      <span class="brand-name">VibeHound</span>
     </a>
     <div class="nav-links">
       <a href="/">Home</a>
       <a href="/install" aria-current="page">Install</a>
-      <a href="https://github.com/vipperson1p-wq/leakhound">GitHub</a>
+      <a href="https://github.com/vipperson1p-wq/vibehound">GitHub</a>
     </div>
   </nav>
 </header>
@@ -34,7 +34,7 @@
 <main id="main">
 
 <section class="wrap install-hero">
-  <h1>Install LeakHound</h1>
+  <h1>Install VibeHound</h1>
   <p>Three steps, about two minutes. Everything runs on your machine. You need Node.js 18 or newer.</p>
 </section>
 
@@ -58,11 +58,11 @@
         <div class="tabpanel" role="tabpanel" id="panel-claude" aria-labelledby="tab-claude" tabindex="0">
           <div class="code-block">
             <div class="code-head"><span>Add the MCP server (terminal)</span><button type="button" class="copy-btn is-ghost" data-copy-target="code-claude-mcp" aria-label="Copy: Add the MCP server">Copy</button></div>
-            <pre id="code-claude-mcp">claude mcp add leakhound --scope user -- npx -y leakhound mcp</pre>
+            <pre id="code-claude-mcp">claude mcp add vibehound --scope user -- npx -y vibehound mcp</pre>
           </div>
           <div class="code-block">
-            <div class="code-head"><span>Install the skill for /leakhound (terminal)</span><button type="button" class="copy-btn is-ghost" data-copy-target="code-claude-skill" aria-label="Copy: Install the skill">Copy</button></div>
-            <pre id="code-claude-skill">npx leakhound install-skill --user</pre>
+            <div class="code-head"><span>Install the skill for /vibehound (terminal)</span><button type="button" class="copy-btn is-ghost" data-copy-target="code-claude-skill" aria-label="Copy: Install the skill">Copy</button></div>
+            <pre id="code-claude-skill">npx vibehound install-skill --user</pre>
           </div>
           <p class="small">Start a new Claude Code session so it picks up the server.</p>
         </div>
@@ -72,16 +72,16 @@
             <div class="code-head"><span>Add to .cursor/mcp.json</span><button type="button" class="copy-btn is-ghost" data-copy-target="code-cursor-mcp" aria-label="Copy: .cursor/mcp.json">Copy</button></div>
             <pre id="code-cursor-mcp">{
   "mcpServers": {
-    "leakhound": {
+    "vibehound": {
       "command": "npx",
-      "args": ["-y", "leakhound", "mcp"]
+      "args": ["-y", "vibehound", "mcp"]
     }
   }
 }</pre>
           </div>
           <div class="code-block">
-            <div class="code-head"><span>Install the skill for /leakhound (terminal)</span><button type="button" class="copy-btn is-ghost" data-copy-target="code-cursor-skill" aria-label="Copy: Install the skill">Copy</button></div>
-            <pre id="code-cursor-skill">npx leakhound install-skill --cursor</pre>
+            <div class="code-head"><span>Install the skill for /vibehound (terminal)</span><button type="button" class="copy-btn is-ghost" data-copy-target="code-cursor-skill" aria-label="Copy: Install the skill">Copy</button></div>
+            <pre id="code-cursor-skill">npx vibehound install-skill --cursor</pre>
           </div>
           <p class="small">Reload Cursor after saving the file.</p>
         </div>
@@ -91,9 +91,9 @@
             <div class="code-head"><span>Add to claude_desktop_config.json</span><button type="button" class="copy-btn is-ghost" data-copy-target="code-desktop-mcp" aria-label="Copy: claude_desktop_config.json">Copy</button></div>
             <pre id="code-desktop-mcp">{
   "mcpServers": {
-    "leakhound": {
+    "vibehound": {
       "command": "npx",
-      "args": ["-y", "leakhound", "mcp"]
+      "args": ["-y", "vibehound", "mcp"]
     }
   }
 }</pre>
@@ -104,23 +104,23 @@
         <div class="tabpanel" role="tabpanel" id="panel-cli" aria-labelledby="tab-cli" tabindex="0" hidden>
           <div class="code-block">
             <div class="code-head"><span>Scan the project</span><button type="button" class="copy-btn is-ghost" data-copy-target="code-cli-scan" aria-label="Copy: Scan the project">Copy</button></div>
-            <pre id="code-cli-scan">npx leakhound</pre>
+            <pre id="code-cli-scan">npx vibehound</pre>
           </div>
           <div class="code-block">
             <div class="code-head"><span>Include old commits</span><button type="button" class="copy-btn is-ghost" data-copy-target="code-cli-history" aria-label="Copy: Include old commits">Copy</button></div>
-            <pre id="code-cli-history">npx leakhound --history</pre>
+            <pre id="code-cli-history">npx vibehound --history</pre>
           </div>
           <p class="small">No AI needed. Run it in your project folder.</p>
           <details class="more">
             <summary>Other ways to install</summary>
             <div class="more-body">
               <div class="code-block">
-                <div class="code-head"><span>Global — then just run <code>leakhound</code></span><button type="button" class="copy-btn is-ghost" data-copy-target="code-cli-global" aria-label="Copy: Global install">Copy</button></div>
-                <pre id="code-cli-global">npm install -g leakhound</pre>
+                <div class="code-head"><span>Global — then just run <code>vibehound</code></span><button type="button" class="copy-btn is-ghost" data-copy-target="code-cli-global" aria-label="Copy: Global install">Copy</button></div>
+                <pre id="code-cli-global">npm install -g vibehound</pre>
               </div>
               <div class="code-block">
                 <div class="code-head"><span>In your project, for teams</span><button type="button" class="copy-btn is-ghost" data-copy-target="code-cli-dev" aria-label="Copy: Install in your project">Copy</button></div>
-                <pre id="code-cli-dev">npm install -D leakhound</pre>
+                <pre id="code-cli-dev">npm install -D vibehound</pre>
                 <p class="small">Everyone on the team gets the same version with <code>npm install</code>. The pre-commit hook then runs this local copy: fast and without internet.</p>
               </div>
             </div>
@@ -141,20 +141,20 @@
     </div>
     <div class="step-main">
       <ul class="slash-list">
-        <li class="slash"><code>/leakhound</code><span>Scan the project and explain every finding in plain words.</span><button type="button" class="copy-btn is-accent" data-copy="/leakhound" aria-label="Copy /leakhound">Copy</button></li>
-        <li class="slash"><code>/leakhound history</code><span>Also search old commits for keys you deleted from files.</span><button type="button" class="copy-btn" data-copy="/leakhound history" aria-label="Copy /leakhound history">Copy</button></li>
-        <li class="slash"><code>/leakhound staged</code><span>Check only what goes into your next commit.</span><button type="button" class="copy-btn" data-copy="/leakhound staged" aria-label="Copy /leakhound staged">Copy</button></li>
-        <li class="slash"><code>/leakhound hook</code><span>Install the pre-commit hook. Asks you first.</span><button type="button" class="copy-btn" data-copy="/leakhound hook" aria-label="Copy /leakhound hook">Copy</button></li>
-        <li class="slash"><code>/leakhound fix</code><span>Fix critical findings one by one. No critical ones? Turn on RLS for tables it couldn’t verify. Ends with the list of keys to rotate.</span><button type="button" class="copy-btn" data-copy="/leakhound fix" aria-label="Copy /leakhound fix">Copy</button></li>
+        <li class="slash"><code>/vibehound</code><span>Scan the project and explain every finding in plain words.</span><button type="button" class="copy-btn is-accent" data-copy="/vibehound" aria-label="Copy /vibehound">Copy</button></li>
+        <li class="slash"><code>/vibehound history</code><span>Also search old commits for keys you deleted from files.</span><button type="button" class="copy-btn" data-copy="/vibehound history" aria-label="Copy /vibehound history">Copy</button></li>
+        <li class="slash"><code>/vibehound staged</code><span>Check only what goes into your next commit.</span><button type="button" class="copy-btn" data-copy="/vibehound staged" aria-label="Copy /vibehound staged">Copy</button></li>
+        <li class="slash"><code>/vibehound hook</code><span>Install the pre-commit hook. Asks you first.</span><button type="button" class="copy-btn" data-copy="/vibehound hook" aria-label="Copy /vibehound hook">Copy</button></li>
+        <li class="slash"><code>/vibehound fix</code><span>Fix critical findings one by one. No critical ones? Turn on RLS for tables it couldn’t verify. Ends with the list of keys to rotate.</span><button type="button" class="copy-btn" data-copy="/vibehound fix" aria-label="Copy /vibehound fix">Copy</button></li>
       </ul>
       <div class="fallback">
         <div class="fallback-text">
           <span class="label">No slash commands, e.g. Claude Desktop? Paste this instead, with your project folder:</span>
-          <span class="prompt-text" id="fallback-prompt">Scan the project in &lt;path to your project&gt; with LeakHound and explain what you find in plain words.</span>
+          <span class="prompt-text" id="fallback-prompt">Scan the project in &lt;path to your project&gt; with VibeHound and explain what you find in plain words.</span>
         </div>
         <button type="button" class="copy-btn is-ghost" data-copy-target="fallback-prompt" aria-label="Copy prompt">Copy</button>
       </div>
-      <p class="terminal-note">Terminal only? Run <code>npx leakhound</code>, or <code>npx leakhound --history</code> to include old commits.</p>
+      <p class="terminal-note">Terminal only? Run <code>npx vibehound</code>, or <code>npx vibehound --history</code> to include old commits.</p>
     </div>
   </div>
 </section>
@@ -169,14 +169,14 @@
     </div>
     <div class="step-main gap-12">
       <div class="cmd">
-        <span class="prompt" aria-hidden="true">$</span><span class="cmd-text">npx leakhound install-hook</span>
-        <button type="button" class="copy-btn is-accent" data-copy="npx leakhound install-hook" aria-label="Copy npx leakhound install-hook">Copy</button>
+        <span class="prompt" aria-hidden="true">$</span><span class="cmd-text">npx vibehound install-hook</span>
+        <button type="button" class="copy-btn is-accent" data-copy="npx vibehound install-hook" aria-label="Copy npx vibehound install-hook">Copy</button>
       </div>
       <figure class="hook-figure">
         <div class="hook-demo">
           <div><span class="t-dim">$</span> git commit -m "add chat"</div>
           <div class="t-gap" aria-hidden="true"></div>
-          <div><span class="t-bold">🔍 leakhound</span>  <span class="t-dim">~/projects/my-app</span></div>
+          <div><span class="t-bold">🔍 vibehound</span>  <span class="t-dim">~/projects/my-app</span></div>
           <div class="t-dim">Mode: commit files only (--staged) · files scanned: 1</div>
           <div class="t-gap" aria-hidden="true"></div>
           <div><span class="t-bold">1.</span> [<span class="t-crit">CRITICAL</span>] <span class="t-bold">OpenAI API key in code</span></div>
@@ -188,11 +188,11 @@
           <div>Total: 1 critical · 0 high · 0 medium · 0 low</div>
           <div>ℹ️  Only files from the upcoming commit were checked: 1.</div>
           <div class="t-gap" aria-hidden="true"></div>
-          <div>⛔ Commit blocked: leakhound found critical or high problems (see above).</div>
+          <div>⛔ Commit blocked: vibehound found critical or high problems (see above).</div>
           <div>   Fix them and git add again. If it is a false positive,</div>
-          <div>   add the path to .leakhoundignore.</div>
+          <div>   add the path to .vibehoundignore.</div>
           <div>   (If there is an npm error above rather than findings, check your connection or install the package:</div>
-          <div>   npm install -D leakhound)</div>
+          <div>   npm install -D vibehound)</div>
         </div>
         <figcaption class="caption">What the hook prints when a commit is blocked. The key is masked.</figcaption>
       </figure>
@@ -206,15 +206,15 @@
     <div class="step-side">
       <div class="step-n">After installing</div>
       <h2 id="help-title">Help the hound get better</h2>
-      <p>LeakHound is free and built in the open. Feedback from real projects is what improves it.</p>
+      <p>VibeHound is free and built in the open. Feedback from real projects is what improves it.</p>
     </div>
     <div class="step-main">
       <ul class="loop">
-        <li><a href="https://github.com/vipperson1p-wq/leakhound">
+        <li><a href="https://github.com/vipperson1p-wq/vibehound">
           <span class="loop-text"><span class="loop-title">Star on GitHub</span><span class="loop-sub">Helps other vibe coders find it.</span></span>
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17L17 7M9 7h8v8"/></svg>
         </a></li>
-        <li><a href="https://github.com/vipperson1p-wq/leakhound/issues/new/choose">
+        <li><a href="https://github.com/vipperson1p-wq/vibehound/issues/new/choose">
           <span class="loop-text"><span class="loop-title">Report a false positive or a missed leak</span><span class="loop-sub">Open an issue. Never paste a real key.</span></span>
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17L17 7M9 7h8v8"/></svg>
         </a></li>
@@ -227,11 +227,11 @@
 
 <footer class="site-footer">
   <div class="wrap footer-inner">
-    <span>LeakHound · MIT License</span>
+    <span>VibeHound · MIT License</span>
     <div class="footer-links">
       <a href="/">Home</a>
-      <a href="https://github.com/vipperson1p-wq/leakhound">GitHub</a>
-      <a href="https://www.npmjs.com/package/leakhound">npm</a>
+      <a href="https://github.com/vipperson1p-wq/vibehound">GitHub</a>
+      <a href="https://www.npmjs.com/package/vibehound">npm</a>
     </div>
   </div>
 </footer>

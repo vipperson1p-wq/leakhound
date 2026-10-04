@@ -1,4 +1,4 @@
-# 🔍 LeakHound
+# 🔍 VibeHound
 
 **English** · [Русский](README.ru.md)
 
@@ -21,45 +21,45 @@ Reports are in **English** or **Russian** (`--lang ru`, or automatically when yo
 Requires Node.js 18+. No dependencies. Run it in your project folder:
 
 ```bash
-npx leakhound .
+npx vibehound .
 ```
 
 To block commits that contain keys, add it to the project and install the pre-commit hook:
 
 ```bash
-npm install -D leakhound
-npx leakhound install-hook
+npm install -D vibehound
+npx vibehound install-hook
 ```
 
-LeakHound used to be published as `vibecode-scanner`. That package is deprecated — install `leakhound` instead.
+VibeHound used to be published as `leakhound` (and before that `vibecode-scanner`). Both packages are deprecated — install `vibehound` instead.
 
 ## Usage
 
 ```bash
-leakhound <path>                     # scan a project
-leakhound <path> --json              # machine-readable output
-leakhound <path> --history           # also scan git history for removed keys
-leakhound <path> --exclude fixtures/ # skip paths (repeatable)
-leakhound --staged                   # only files staged for commit
-leakhound install-hook [path]        # pre-commit hook: block commits with critical/high findings
-leakhound <path> --lang ru           # report language: en (default) or ru
+vibehound <path>                     # scan a project
+vibehound <path> --json              # machine-readable output
+vibehound <path> --history           # also scan git history for removed keys
+vibehound <path> --exclude fixtures/ # skip paths (repeatable)
+vibehound --staged                   # only files staged for commit
+vibehound install-hook [path]        # pre-commit hook: block commits with critical/high findings
+vibehound <path> --lang ru           # report language: en (default) or ru
 ```
 
-Without installing, use `npx leakhound` instead of `leakhound`.
+Without installing, use `npx vibehound` instead of `vibehound`.
 
-Language is picked in this order: `--lang` → `LEAKHOUND_LANG` → `LC_ALL` / `LC_MESSAGES` / `LANG` → system locale → English.
+Language is picked in this order: `--lang` → `VIBEHOUND_LANG` → `LC_ALL` / `LC_MESSAGES` / `LANG` → system locale → English.
 `install-hook --lang ru` makes the hook messages and commit-time reports Russian.
 
 ### Programmatic use
 
 ```js
-import { scan } from 'leakhound';
+import { scan } from 'vibehound';
 const result = await scan('.', { lang: 'en', history: true });
 // result.findings: [{ ruleId, severity, file, line, snippet (masked), title, why, fix, ... }]
 ```
 
 The pre-commit hook runs the scanner from `node_modules/.bin` if the package is installed
-in the project, otherwise via `npx leakhound@<version>` (pinned to the version that
+in the project, otherwise via `npx vibehound@<version>` (pinned to the version that
 installed the hook — it never pulls a newer release on its own).
 
 Exit code: `1` if there are critical or high findings, `0` otherwise, `2` on usage errors —
@@ -80,7 +80,7 @@ instructions, so a malicious file can't hijack the assistant.
 <summary>Claude Code</summary>
 
 ```bash
-claude mcp add leakhound -- npx -y leakhound mcp
+claude mcp add vibehound -- npx -y vibehound mcp
 ```
 
 Add `--scope project` to share it with your team via `.mcp.json`.
@@ -94,7 +94,7 @@ Add `--scope project` to share it with your team via `.mcp.json`.
 ```json
 {
   "mcpServers": {
-    "leakhound": { "command": "npx", "args": ["-y", "leakhound", "mcp"] }
+    "vibehound": { "command": "npx", "args": ["-y", "vibehound", "mcp"] }
   }
 }
 ```
@@ -108,32 +108,32 @@ Settings → Developer → Edit Config, add to `claude_desktop_config.json`, res
 ```json
 {
   "mcpServers": {
-    "leakhound": { "command": "npx", "args": ["-y", "leakhound", "mcp"] }
+    "vibehound": { "command": "npx", "args": ["-y", "vibehound", "mcp"] }
   }
 }
 ```
 
-On Windows, if the server does not start, use `"command": "cmd", "args": ["/c", "npx", "-y", "leakhound", "mcp"]`.
+On Windows, if the server does not start, use `"command": "cmd", "args": ["/c", "npx", "-y", "vibehound", "mcp"]`.
 Claude Desktop doesn't run inside your project, so ask it to scan a specific folder
 (the tools take a `path`).
 </details>
 
 Add `--lang ru` to the args for Russian tool descriptions; each tool call can also pass `lang`.
-To pin a version, use `leakhound@<version>` instead of `leakhound`.
+To pin a version, use `vibehound@<version>` instead of `vibehound`.
 
 **Skill.** Teaches the assistant *when* to scan and *how* to fix findings (move keys to
 server-only env variables, tell you to rotate leaked keys, write RLS migrations), and never
 to bypass the pre-commit hook:
 
 ```bash
-npx leakhound install-skill            # .claude/skills/ in this project (Claude Code; Cursor reads it too)
-npx leakhound install-skill --user     # ~/.claude/skills/ for all your projects
-npx leakhound install-skill --cursor   # .cursor/skills/ for Cursor (2.4+)
+npx vibehound install-skill            # .claude/skills/ in this project (Claude Code; Cursor reads it too)
+npx vibehound install-skill --user     # ~/.claude/skills/ for all your projects
+npx vibehound install-skill --cursor   # .cursor/skills/ for Cursor (2.4+)
 ```
 
 The skill works with or without the MCP server: without it, the assistant runs the CLI.
 
-### The /leakhound command
+### The /vibehound command
 
 The same skill is also a slash command in Claude Code and Cursor. The assistant still
 runs it on its own before commits and after keys or migrations; type it when you want
@@ -141,11 +141,11 @@ to ask yourself:
 
 | Command | What it does |
 |---|---|
-| `/leakhound` | Scan the project and explain the findings in plain words |
-| `/leakhound history` | The same, plus the whole git history: keys deleted from files but left in old commits |
-| `/leakhound staged` | Check only what goes into the next commit |
-| `/leakhound hook` | Install the pre-commit hook — asks you first |
-| `/leakhound fix` | Fix critical findings one by one, asking before every change; ends with the list of keys you need to rotate. No critical ones → turns on RLS for tables the scanner couldn't verify, in a new migration, after asking |
+| `/vibehound` | Scan the project and explain the findings in plain words |
+| `/vibehound history` | The same, plus the whole git history: keys deleted from files but left in old commits |
+| `/vibehound staged` | Check only what goes into the next commit |
+| `/vibehound hook` | Install the pre-commit hook — asks you first |
+| `/vibehound fix` | Fix critical findings one by one, asking before every change; ends with the list of keys you need to rotate. No critical ones → turns on RLS for tables the scanner couldn't verify, in a new migration, after asking |
 
 Every scan asks for your permission, like any other tool call.
 
@@ -182,7 +182,7 @@ added by `git add .`, plus gitignored `.env*` files (for public variables only).
 
 ## Exclusions
 
-Create `.leakhoundignore` in the project root (simplified `.gitignore` syntax):
+Create `.vibehoundignore` in the project root (simplified `.gitignore` syntax):
 
 ```
 # comment
@@ -206,7 +206,7 @@ Found a vulnerability in the scanner itself? Please report it privately — see 
 
 ## Support the project
 
-LeakHound is free and open source, with no subscriptions. If it saved you
+VibeHound is free and open source, with no subscriptions. If it saved you
 from leaking a key, you can support development:
 
 <!-- TODO: donation link -->

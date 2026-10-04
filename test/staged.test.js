@@ -10,7 +10,7 @@ const KEY = ['sk-', 'proj-', 'Z9y8X7w6V5u4T3s2R1q0P9o8'].join('');
 const ids = (r) => r.findings.map((f) => f.ruleId).sort();
 
 function repo() {
-  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'leakhound-git-'));
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'vibehound-git-'));
   const git = (...args) => execFileSync('git', ['-c', 'user.name=t', '-c', 'user.email=t@t', ...args], { cwd: dir, stdio: 'pipe' });
   const write = (rel, content) => {
     fs.mkdirSync(path.dirname(path.join(dir, rel)), { recursive: true });
@@ -84,7 +84,7 @@ describe('--staged', () => {
   });
 
   test('throws outside git repository', () => {
-    const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'leakhound-'));
+    const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'vibehound-'));
     assert.throws(() => scanProject(dir, { staged: true }), /git/);
   });
 });
@@ -116,7 +116,7 @@ describe('gitignored .env files in git mode', () => {
     assert.deepEqual(scanProject(dir).findings, []);
   });
 
-  test('ignored .env files are excluded by .leakhoundignore and skipped in --staged', () => {
+  test('ignored .env files are excluded by .vibehoundignore and skipped in --staged', () => {
     const { dir, write, git } = repo();
     write('.env.local', `${pub('OPEN' + 'AI_API_KEY')}=abc123\n`);
     write('a.ts', 'x = 1');

@@ -38,7 +38,7 @@ describe('ignore patterns', () => {
 
 describe('scanProject exclusions', () => {
   const leaky = () => {
-    const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'leakhound-'));
+    const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'vibehound-'));
     fs.writeFileSync(path.join(dir, '.gitignore'), '.env*\n');
     fs.mkdirSync(path.join(dir, 'fixtures'));
     fs.writeFileSync(path.join(dir, 'fixtures', 'k.ts'), `k = "${['sk-', 'proj-', 'Z9y8X7w6V5u4T3s2R1q0P9o8'].join('')}"`);
@@ -55,9 +55,9 @@ describe('scanProject exclusions', () => {
     assert.ok(r.notes.some((n) => n.key === 'excluded' && n.params.count === 1));
   });
 
-  test('.leakhoundignore is respected', () => {
+  test('.vibehoundignore is respected', () => {
     const dir = leaky();
-    fs.writeFileSync(path.join(dir, '.leakhoundignore'), '# fake keys\nfixtures/\n');
+    fs.writeFileSync(path.join(dir, '.vibehoundignore'), '# fake keys\nfixtures/\n');
     assert.deepEqual(scanProject(dir).findings, []);
   });
 
@@ -69,7 +69,19 @@ describe('scanProject exclusions', () => {
     fs.mkdirSync(path.join(dir, 'other'));
     fs.copyFileSync(path.join(dir, 'fixtures', 'k.ts'), path.join(dir, 'other', 'k.ts'));
     assert.equal(scanProject(dir).findings.length, 1);
-    fs.writeFileSync(path.join(dir, '.leakhoundignore'), 'other/\n');
+    fs.writeFileSync(path.join(dir, '.vibehoundignore'), 'other/\n');
+    assert.deepEqual(scanProject(dir).findings, []);
+  });
+
+  test('.leakhoundignore from before the rename is still read, together with the new file', () => {
+    const dir = leaky();
+    fs.writeFileSync(path.join(dir, '.leakhoundignore'), 'fixtures/\n');
+    assert.deepEqual(scanProject(dir).findings, []);
+
+    fs.mkdirSync(path.join(dir, 'other'));
+    fs.copyFileSync(path.join(dir, 'fixtures', 'k.ts'), path.join(dir, 'other', 'k.ts'));
+    assert.equal(scanProject(dir).findings.length, 1);
+    fs.writeFileSync(path.join(dir, '.vibehoundignore'), 'other/\n');
     assert.deepEqual(scanProject(dir).findings, []);
   });
 });

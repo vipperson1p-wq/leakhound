@@ -1,4 +1,4 @@
-// Исключения: флаг --exclude и файл .leakhoundignore.
+// Исключения: флаг --exclude и файл .vibehoundignore.
 // Синтаксис — упрощённый .gitignore:
 //   dir/          папка на любой глубине
 //   /dir или a/b  путь от корня проекта
@@ -6,9 +6,9 @@
 //   # комментарий
 // Отрицания (!pattern) не поддерживаются.
 
-export const IGNORE_FILE = '.leakhoundignore';
-// Name from before the rename (vibecode-scanner) — still read, so existing exclusions keep working
-export const LEGACY_IGNORE_FILES = ['.vibescanignore'];
+export const IGNORE_FILE = '.vibehoundignore';
+// Names from before the renames (leakhound, vibecode-scanner) — still read, so existing exclusions keep working
+export const LEGACY_IGNORE_FILES = ['.leakhoundignore', '.vibescanignore'];
 
 // Patterns from every ignore file in the project root; readText(abs) returns null for a missing file
 export function readIgnoreFiles(root, readText) {

@@ -1,6 +1,6 @@
 # Security Policy
 
-LeakHound is a security tool, so bugs in it can hurt the people who rely on it.
+VibeHound is a security tool, so bugs in it can hurt the people who rely on it.
 Thank you for reporting them responsibly.
 
 ## Reporting a vulnerability
@@ -9,7 +9,7 @@ Thank you for reporting them responsibly.
 
 Report privately through GitHub:
 **Security** tab → **Report a vulnerability**
-([direct link](https://github.com/vipperson1p-wq/leakhound/security/advisories/new)).
+([direct link](https://github.com/vipperson1p-wq/vibehound/security/advisories/new)).
 
 Please include:
 

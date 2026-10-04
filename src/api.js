@@ -1,6 +1,6 @@
 // Programmatic API — used by the CLI and meant for the future MCP server.
 //
-//   import { scan } from 'leakhound';
+//   import { scan } from 'vibehound';
 //   const result = await scan('.', { lang: 'en', history: true });
 //
 // Returns findings with texts in the chosen language. Secrets in snippets are always masked.

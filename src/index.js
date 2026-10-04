@@ -1,10 +1,10 @@
 #!/usr/bin/env node
-// Usage: leakhound <path> [--json] [--staged | --history] [--exclude <pattern>]... [--lang en|ru]
-//        leakhound install-hook [path] [--force] [--lang en|ru]
-//        leakhound install-skill [path] [--user | --cursor] [--force]
-//        leakhound mcp [--lang en|ru]          (MCP server over stdio)
-//        leakhound --help | --version
-// Language: --lang → LEAKHOUND_LANG → LC_ALL / LC_MESSAGES / LANG → system locale → English.
+// Usage: vibehound <path> [--json] [--staged | --history] [--exclude <pattern>]... [--lang en|ru]
+//        vibehound install-hook [path] [--force] [--lang en|ru]
+//        vibehound install-skill [path] [--user | --cursor] [--force]
+//        vibehound mcp [--lang en|ru]          (MCP server over stdio)
+//        vibehound --help | --version
+// Language: --lang → VIBEHOUND_LANG → LC_ALL / LC_MESSAGES / LANG → system locale → English.
 import fs from 'node:fs';
 import { printReport } from './report.js';
 import { installHook } from './hook.js';
@@ -37,7 +37,7 @@ function fail(e) {
 }
 if (langError) fail(langError);
 
-// --help / --version win over any command, so `leakhound mcp --help` does not start the server
+// --help / --version win over any command, so `vibehound mcp --help` does not start the server
 const VERSION = JSON.parse(fs.readFileSync(new URL('../package.json', import.meta.url), 'utf8')).version;
 if (argv.some((a) => a === '--help' || a === '-h')) {
   console.log(t('cli.help', { version: VERSION }));
@@ -89,7 +89,7 @@ if (argv[0] === 'install-skill') {
     const { installSkill } = await import('./skill.js');
     const { file, overwritten, removedLegacy } = installSkill({ where, root: target, force: rest.includes('--force') });
     console.log(t(overwritten ? 'cli.skillUpdated' : 'cli.skillInstalled', { path: file }));
-    if (removedLegacy) console.log(t('cli.skillLegacyRemoved', { path: removedLegacy }));
+    for (const old of removedLegacy) console.log(t('cli.skillLegacyRemoved', { path: old }));
     console.log(t(where === 'cursor' ? 'cli.skillExplainCursor' : 'cli.skillExplain'));
     console.log(t('cli.skillCommands'));
     process.exit(0);

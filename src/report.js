@@ -18,7 +18,7 @@ export function printReport(raw, lang) {
   const clientSide = (x) => (x.clientSide ? `  ⚠️  ${t('report.clientSide')}` : '');
   const commit = (c) => t('report.commit', { commit: c.short, date: c.date, subject: c.subject });
 
-  console.log(`\n${C.bold}🔍 leakhound${C.reset}  ${C.dim}${root}${C.reset}`);
+  console.log(`\n${C.bold}🔍 vibehound${C.reset}  ${C.dim}${root}${C.reset}`);
   console.log(`${C.dim}${t('report.mode')}: ${t(`report.modes.${mode}`)} · ${t('report.filesScanned')}: ${filesScanned}${C.reset}\n`);
 
   if (findings.length === 0) {
